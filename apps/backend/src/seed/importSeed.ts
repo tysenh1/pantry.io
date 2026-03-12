@@ -1,12 +1,12 @@
 import sqlite3 from 'sqlite3';
-import { seedPantry, seedRecipes, seedRecipeIngredients, genericNames } from './seedData.ts';
+import { seedPantry, seedRecipes, seedRecipeIngredients, seedGenericNames } from './seedData.ts';
 import path from 'path';
 import fs from 'fs';
 
 const db = new sqlite3.Database('./db.db');
 
 // ✅ FIXED: Import seedRecipeIngredients from your seedData.ts
-const schemaPath = '/home/tysenh1/Coding/kitchenio/apps/backend/';
+const schemaPath = '/home/tysenh1/Coding/pantry.io/apps/backend/';
 const schemaSql = fs.readFileSync(schemaPath + 'schema.sql', 'utf8');
 
 const runImport = () => {
@@ -26,9 +26,9 @@ const runImport = () => {
     db.exec(schemaSql);
 
     // 3. Insert Pantry
-    const pantryStmt = db.prepare("INSERT INTO pantry (id, item_name, quantity, unit, is_staple) VALUES (?, ?, ?, ?, ?)");
+    const pantryStmt = db.prepare("INSERT INTO pantry (id, item_name, quantity, unit, is_staple, generic_name_id) VALUES (?, ?, ?, ?, ?, ?)");
     seedPantry.forEach(item => {
-      pantryStmt.run(item.id, item.item_name, item.quantity, item.unit, item.is_staple);
+      pantryStmt.run(item.id, item.item_name, item.quantity, item.unit, item.is_staple, item.generic_name_id);
     });
     pantryStmt.finalize();
 
@@ -48,7 +48,7 @@ const runImport = () => {
 
     const genericNameStmt = db.prepare("INSERT INTO generic_name (id, generic_name) VALUES (?, ?)");
     seedGenericNames.forEach(name => {
-      genericNameStmt.run(name.id, name.generic_name);
+      genericNameStmt.run(name.id, name.name);
     })
     genericNameStmt.finalize();
 

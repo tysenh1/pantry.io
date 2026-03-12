@@ -1,9 +1,15 @@
+CREATE TABLE IF NOT EXISTS generic_name(
+    id TEXT PRIMARY KEY,
+    generic_name TEXT UNIQUE
+);
 CREATE TABLE IF NOT EXISTS pantry(
     id TEXT PRIMARY KEY,
+    generic_name_id TEXT NOT NULL,
     item_name TEXT NOT NULL UNIQUE,
     quantity REAL,
     unit TEXT,
-    is_staple BOOLEAN DEFAULT 0
+    is_staple BOOLEAN DEFAULT 0,
+    FOREIGN KEY(generic_name_id) REFERENCES generic_name(id) ON DELETE CASCADE
 );
 CREATE TABLE IF NOT EXISTS recipes(
     id TEXT PRIMARY KEY,
@@ -17,8 +23,8 @@ CREATE TABLE IF NOT EXISTS recipe_ingredients(
     ingredient_id TEXT,
     quantity_needed REAL,
     unit TEXT,
-    FOREIGN KEY(ingredient_id) REFERENCES pantry(id),
-    FOREIGN KEY(id) REFERENCES recipes(id)
+    FOREIGN KEY(ingredient_id) REFERENCES pantry(id) ON DELETE CASCADE,
+    FOREIGN KEY(id) REFERENCES recipes(id) ON DELETE CASCADE
 );
 CREATE TABLE IF NOT EXISTS item(
     id TEXT PRIMARY KEY,
@@ -31,10 +37,7 @@ CREATE TABLE IF NOT EXISTS item(
     image_url TEXT,
     FOREIGN KEY(generic_name_id) REFERENCES generic_name(id) ON DELETE CASCADE
 );
-CREATE TABLE IF NOT EXISTS generic_name(
-    id TEXT PRIMARY KEY,
-    generic_name TEXT UNIQUE
-);
+
 CREATE TABLE IF NOT EXISTS allergens(
     id TEXT PRIMARY KEY,
     name TEXT UNIQUE NOT NULL

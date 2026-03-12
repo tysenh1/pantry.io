@@ -67,51 +67,203 @@ const ingredientIds = {
   bun: uuidv4()
 }
 
+const genericNameIds = {
+  // Essential Proteins
+  chicken: uuidv4(),
+  beef: uuidv4(),
+  pork: uuidv4(),
+  fish: uuidv4(),
+  shrimp: uuidv4(),
+  eggs: uuidv4(),
+  tofu: uuidv4(),
+  turkey: uuidv4(),
+  lamb: uuidv4(),
+  sausage: uuidv4(),
+  bacon: uuidv4(),
+
+  // Essential Dairy
+  milk: uuidv4(),
+  butter: uuidv4(),
+  cheese: uuidv4(),
+  yogurt: uuidv4(),
+  cream: uuidv4(),
+  sour_cream: uuidv4(),
+  cream_cheese: uuidv4(),
+  parmesan: uuidv4(),
+
+  // Produce Essentials
+  onion: uuidv4(),
+  garlic: uuidv4(),
+  potato: uuidv4(),
+  tomato: uuidv4(),
+  carrot: uuidv4(),
+  celery: uuidv4(),
+  bell_pepper: uuidv4(),
+  broccoli: uuidv4(),
+  spinach: uuidv4(),
+  lettuce: uuidv4(),
+  cucumber: uuidv4(),
+  zucchini: uuidv4(),
+  mushroom: uuidv4(),
+  cabbage: uuidv4(),
+  ginger: uuidv4(),
+  avocado: uuidv4(),
+  apple: uuidv4(),
+  banana: uuidv4(),
+  lemon: uuidv4(),
+  lime: uuidv4(),
+
+  // Grains & Pasta
+  rice: uuidv4(),
+  flour: uuidv4(),
+  pasta: uuidv4(),
+  bread: uuidv4(),
+  oats: uuidv4(),
+  quinoa: uuidv4(),
+  tortilla: uuidv4(),
+  breadcrumbs: uuidv4(),
+
+  // Condiments & Oils
+  olive_oil: uuidv4(),
+  vegetable_oil: uuidv4(),
+  soy_sauce: uuidv4(),
+  vinegar: uuidv4(),
+  ketchup: uuidv4(),
+  mustard: uuidv4(),
+  mayonnaise: uuidv4(),
+  hot_sauce: uuidv4(),
+  honey: uuidv4(),
+  maple_syrup: uuidv4(),
+
+  // Spices & Baking
+  salt: uuidv4(),
+  black_pepper: uuidv4(),
+  sugar: uuidv4(),
+  brown_sugar: uuidv4(),
+  baking_powder: uuidv4(),
+  baking_disoda: uuidv4(),
+  yeast: uuidv4(),
+  vanilla: uuidv4(),
+  cinnamon: uuidv4(),
+  cumin: uuidv4(),
+  paprika: uuidv4(),
+  chili_powder: uuidv4(),
+  oregano: uuidv4(),
+
+  // Niche/Canned/Frozen
+  chickpeas: uuidv4(),
+  black_beans: uuidv4(),
+  lentils: uuidv4(),
+  coconut_milk: uuidv4(),
+  tomato_sauce: uuidv4(),
+  broth: uuidv4(),
+  peanut_butter: uuidv4(),
+  corn: uuidv4(),
+  peas: uuidv4(),
+  artichoke: uuidv4()
+};
+
+export const seedGenericNames = [
+  // Proteins
+  { id: genericNameIds.chicken, name: 'Chicken' },
+  { id: genericNameIds.beef, name: 'Beef' },
+  { id: genericNameIds.pork, name: 'Pork' },
+  { id: genericNameIds.fish, name: 'Fish' },
+  { id: genericNameIds.shrimp, name: 'Shrimp' },
+  { id: genericNameIds.eggs, name: 'Eggs' },
+  { id: genericNameIds.tofu, name: 'Tofu' },
+  { id: genericNameIds.turkey, name: 'Turkey' },
+  { id: genericNameIds.lamb, name: 'Lamb' },
+  { id: genericNameIds.sausage, name: 'Sausage' },
+  { id: genericNameIds.bacon, name: 'Bacon' },
+
+  // Dairy
+  { id: genericNameIds.milk, name: 'Milk' },
+  { id: genericNameIds.butter, name: 'Butter' },
+  { id: genericNameIds.cheese, name: 'Cheese' },
+  { id: genericNameIds.yogurt, name: 'Yogurt' },
+  { id: genericNameIds.cream, name: 'Cream' },
+  { id: genericNameIds.sour_cream, name: 'Sour Cream' },
+  { id: genericNameIds.cream_cheese, name: 'Cream Cheese' },
+  { id: genericNameIds.parmesan, name: 'Parmesan' },
+
+  // Produce
+  { id: genericNameIds.onion, name: 'Onion' },
+  { id: genericNameIds.garlic, name: 'Garlic' },
+  { id: genericNameIds.potato, name: 'Potato' },
+  { id: genericNameIds.tomato, name: 'Tomato' },
+  { id: genericNameIds.carrot, name: 'Carrot' },
+  { id: genericNameIds.bell_pepper, name: 'Bell Pepper' },
+  { id: genericNameIds.broccoli, name: 'Broccoli' },
+  { id: genericNameIds.spinach, name: 'Spinach' },
+  { id: genericNameIds.lemon, name: 'Lemon' },
+  { id: genericNameIds.ginger, name: 'Ginger' },
+
+  // Pantry
+  { id: genericNameIds.rice, name: 'Rice' },
+  { id: genericNameIds.flour, name: 'Flour' },
+  { id: genericNameIds.pasta, name: 'Pasta' },
+  { id: genericNameIds.olive_oil, name: 'Olive Oil' },
+  { id: genericNameIds.salt, name: 'Salt' },
+  { id: genericNameIds.sugar, name: 'Sugar' },
+  { id: genericNameIds.chickpeas, name: 'Chickpeas' },
+  { id: genericNameIds.coconut_milk, name: 'Coconut Milk' }
+];
+
 // Track ingredient-to-pantry-ID mapping for recipe_ingredients table
 const ingredientToPantryId: Record<string, string> = {};
 
-export const seedPantry = [
+interface Pantry {
+  id: string;
+  item_name: string;
+  quantity: number;
+  unit: string;
+  is_staple: number;
+  generic_name_id: string;
+}
+
+export const seedPantry: Pantry[] = [
   // ALL pantry items with FIXED IDs that match recipe mappedIngredients
-  { id: ingredientIds.chickenBreast, item_name: 'Chicken Breast', quantity: 1000, unit: 'g', is_staple: 0 },
-  { id: ingredientIds.groundBeef, item_name: 'Ground Beef', quantity: 500, unit: 'g', is_staple: 0 },
-  { id: ingredientIds.eggs, item_name: 'Eggs', quantity: 12, unit: 'pcs', is_staple: 1 },
-  { id: ingredientIds.salmonFillet, item_name: 'Salmon Fillet', quantity: 300, unit: 'g', is_staple: 0 },
-  { id: ingredientIds.shrimp, item_name: 'Shrimp', quantity: 200, unit: 'g', is_staple: 0 },
-  { id: ingredientIds.spaghetti, item_name: 'Spaghetti', quantity: 500, unit: 'g', is_staple: 1 },
-  { id: ingredientIds.whiteRice, item_name: 'White Rice', quantity: 2, unit: 'kg', is_staple: 1 },
-  { id: ingredientIds.tortilla, item_name: 'Tortillas', quantity: 8, unit: 'pcs', is_staple: 0 },
-  { id: ingredientIds.brownRice, item_name: 'Brown Rice', quantity: 1, unit: 'kg', is_staple: 1 },
-  { id: ingredientIds.breadSlice, item_name: 'Bread Slices', quantity: 20, unit: 'pcs', is_staple: 1 },
-  { id: ingredientIds.lasangaNoodle, item_name: 'Lasagna Noodles', quantity: 400, unit: 'g', is_staple: 0 },
-  { id: ingredientIds.garlic, item_name: 'Garlic', quantity: 5, unit: 'cloves', is_staple: 1 },
-  { id: ingredientIds.onion, item_name: 'Onion', quantity: 2, unit: 'pcs', is_staple: 1 },
-  { id: ingredientIds.bellPepper, item_name: 'Bell Peppers', quantity: 3, unit: 'pcs', is_staple: 0 },
-  { id: ingredientIds.broccoli, item_name: 'Broccoli', quantity: 1, unit: 'head', is_staple: 0 },
-  { id: ingredientIds.spinach, item_name: 'Spinach', quantity: 200, unit: 'g', is_staple: 0 },
-  { id: ingredientIds.carrot, item_name: 'Carrots', quantity: 5, unit: 'pcs', is_staple: 1 },
-  { id: ingredientIds.tomato, item_name: 'Tomatoes', quantity: 6, unit: 'pcs', is_staple: 0 },
-  { id: ingredientIds.mushroom, item_name: 'Mushrooms', quantity: 200, unit: 'g', is_staple: 0 },
-  { id: ingredientIds.zucchini, item_name: 'Zucchini', quantity: 3, unit: 'pcs', is_staple: 0 },
-  { id: ingredientIds.oliveOil, item_name: 'Olive Oil', quantity: 1, unit: 'L', is_staple: 1 },
-  { id: ingredientIds.soySauce, item_name: 'Soy Sauce', quantity: 250, unit: 'ml', is_staple: 1 },
-  { id: ingredientIds.butter, item_name: 'Butter', quantity: 250, unit: 'g', is_staple: 1 },
-  { id: ingredientIds.cheddarCheese, item_name: 'Cheddar Cheese', quantity: 200, unit: 'g', is_staple: 0 },
-  { id: ingredientIds.milk, item_name: 'Milk', quantity: 2, unit: 'L', is_staple: 1 },
-  { id: ingredientIds.flour, item_name: 'Flour', quantity: 2, unit: 'kg', is_staple: 1 },
-  { id: ingredientIds.sugar, item_name: 'Sugar', quantity: 1, unit: 'kg', is_staple: 1 },
-  { id: ingredientIds.honey, item_name: 'Honey', quantity: 500, unit: 'g', is_staple: 1 },
-  { id: ingredientIds.tomatoSauce, item_name: 'Tomato Sauce', quantity: 800, unit: 'g', is_staple: 1 },
+  { id: ingredientIds.chickenBreast, item_name: 'Chicken Breast', quantity: 1000, unit: 'g', is_staple: 0, generic_name_id: genericNameIds.chicken },
+  { id: ingredientIds.groundBeef, item_name: 'Ground Beef', quantity: 500, unit: 'g', is_staple: 0, generic_name_id: genericNameIds.beef },
+  { id: ingredientIds.eggs, item_name: 'Eggs', quantity: 12, unit: 'pcs', is_staple: 1, generic_name_id: genericNameIds.eggs },
+  { id: ingredientIds.salmonFillet, item_name: 'Salmon Fillet', quantity: 300, unit: 'g', is_staple: 0, generic_name_id: genericNameIds.fish },
+  { id: ingredientIds.shrimp, item_name: 'Shrimp', quantity: 200, unit: 'g', is_staple: 0, generic_name_id: genericNameIds.fish },
+  { id: ingredientIds.spaghetti, item_name: 'Spaghetti', quantity: 500, unit: 'g', is_staple: 1, generic_name_id: genericNameIds.pasta },
+  { id: ingredientIds.whiteRice, item_name: 'White Rice', quantity: 2, unit: 'kg', is_staple: 1, generic_name_id: genericNameIds.rice },
+  { id: ingredientIds.tortilla, item_name: 'Tortillas', quantity: 8, unit: 'pcs', is_staple: 0, generic_name_id: genericNameIds.tortilla },
+  { id: ingredientIds.brownRice, item_name: 'Brown Rice', quantity: 1, unit: 'kg', is_staple: 1, generic_name_id: genericNameIds.rice },
+  { id: ingredientIds.breadSlice, item_name: 'Bread Slices', quantity: 20, unit: 'pcs', is_staple: 1, generic_name_id: genericNameIds.bread },
+  { id: ingredientIds.lasangaNoodle, item_name: 'Lasagna Noodles', quantity: 400, unit: 'g', is_staple: 0, generic_name_id: genericNameIds.pasta },
+  { id: ingredientIds.garlic, item_name: 'Garlic', quantity: 5, unit: 'cloves', is_staple: 1, generic_name_id: genericNameIds.garlic },
+  { id: ingredientIds.onion, item_name: 'Onion', quantity: 2, unit: 'pcs', is_staple: 1, generic_name_id: genericNameIds.onion },
+  { id: ingredientIds.bellPepper, item_name: 'Bell Peppers', quantity: 3, unit: 'pcs', is_staple: 0, generic_name_id: genericNameIds.bell_pepper },
+  { id: ingredientIds.broccoli, item_name: 'Broccoli', quantity: 1, unit: 'head', is_staple: 0, generic_name_id: genericNameIds.broccoli },
+  { id: ingredientIds.spinach, item_name: 'Spinach', quantity: 200, unit: 'g', is_staple: 0, generic_name_id: genericNameIds.spinach },
+  { id: ingredientIds.carrot, item_name: 'Carrots', quantity: 5, unit: 'pcs', is_staple: 1, generic_name_id: genericNameIds.carrot },
+  { id: ingredientIds.tomato, item_name: 'Tomatoes', quantity: 6, unit: 'pcs', is_staple: 0, generic_name_id: genericNameIds.tomato },
+  { id: ingredientIds.mushroom, item_name: 'Mushrooms', quantity: 200, unit: 'g', is_staple: 0, generic_name_id: genericNameIds.mushroom },
+  { id: ingredientIds.zucchini, item_name: 'Zucchini', quantity: 3, unit: 'pcs', is_staple: 0, generic_name_id: genericNameIds.zucchini },
+  { id: ingredientIds.oliveOil, item_name: 'Olive Oil', quantity: 1, unit: 'L', is_staple: 1, generic_name_id: genericNameIds.olive_oil },
+  { id: ingredientIds.soySauce, item_name: 'Soy Sauce', quantity: 250, unit: 'ml', is_staple: 1, generic_name_id: genericNameIds.soy_sauce },
+  { id: ingredientIds.butter, item_name: 'Butter', quantity: 250, unit: 'g', is_staple: 1, generic_name_id: genericNameIds.butter },
+  { id: ingredientIds.cheddarCheese, item_name: 'Cheddar Cheese', quantity: 200, unit: 'g', is_staple: 0, generic_name_id: genericNameIds.cheese },
+  { id: ingredientIds.milk, item_name: 'Milk', quantity: 2, unit: 'L', is_staple: 1, generic_name_id: genericNameIds.milk },
+  { id: ingredientIds.flour, item_name: 'Flour', quantity: 2, unit: 'kg', is_staple: 1, generic_name_id: genericNameIds.flour },
+  { id: ingredientIds.sugar, item_name: 'Sugar', quantity: 1, unit: 'kg', is_staple: 1, generic_name_id: genericNameIds.sugar },
+  { id: ingredientIds.honey, item_name: 'Honey', quantity: 500, unit: 'g', is_staple: 1, generic_name_id: genericNameIds.honey },
+  { id: ingredientIds.tomatoSauce, item_name: 'Tomato Sauce', quantity: 800, unit: 'g', is_staple: 1, generic_name_id: genericNameIds.tomato_sauce },
   // MISSING INGREDIENTS NOW PROPERLY ADDED
-  { id: ingredientIds.coconutMilk, item_name: 'Coconut Milk', quantity: 0, unit: 'ml', is_staple: 0 },
-  { id: ingredientIds.redCurryPaste, item_name: 'Red Curry Paste', quantity: 0, unit: 'tbsp', is_staple: 0 },
-  { id: ingredientIds.beefSteak, item_name: 'Beef Steak', quantity: 0, unit: 'g', is_staple: 0 },
-  { id: ingredientIds.mozzarellaCheese, item_name: 'Mozzarella Cheese', quantity: 0, unit: 'g', is_staple: 0 },
-  { id: ingredientIds.bakingPowder, item_name: 'Baking Powder', quantity: 0, unit: 'tsp', is_staple: 0 },
-  { id: ingredientIds.noriSheets, item_name: 'Nori Sheets', quantity: 0, unit: 'sheets', is_staple: 0 },
-  { id: ingredientIds.avocado, item_name: 'Avocado', quantity: 0, unit: 'pcs', is_staple: 0 },
-  { id: ingredientIds.peanutButter, item_name: 'Peanut Butter', quantity: 0, unit: 'g', is_staple: 0 },
-  { id: ingredientIds.lime, item_name: 'Lime', quantity: 0, unit: 'pcs', is_staple: 0 },
-  { id: ingredientIds.bun, item_name: 'Bun', quantity: 0, unit: 'pcs', is_staple: 0 },
+  { id: ingredientIds.coconutMilk, item_name: 'Coconut Milk', quantity: 0, unit: 'ml', is_staple: 0, generic_name_id: genericNameIds.coconut_milk },
+  { id: ingredientIds.redCurryPaste, item_name: 'Red Curry Paste', quantity: 0, unit: 'tbsp', is_staple: 0, generic_name_id: genericNameIds.tomato_sauce },
+  { id: ingredientIds.beefSteak, item_name: 'Beef Steak', quantity: 0, unit: 'g', is_staple: 0, generic_name_id: genericNameIds.beef },
+  { id: ingredientIds.mozzarellaCheese, item_name: 'Mozzarella Cheese', quantity: 0, unit: 'g', is_staple: 0, generic_name_id: genericNameIds.cheese },
+  { id: ingredientIds.bakingPowder, item_name: 'Baking Powder', quantity: 0, unit: 'tsp', is_staple: 0, generic_name_id: genericNameIds.baking_powder },
+  { id: ingredientIds.noriSheets, item_name: 'Nori Sheets', quantity: 0, unit: 'sheets', is_staple: 0, generic_name_id: genericNameIds.tortilla },
+  { id: ingredientIds.avocado, item_name: 'Avocado', quantity: 0, unit: 'pcs', is_staple: 0, generic_name_id: genericNameIds.avocado },
+  { id: ingredientIds.peanutButter, item_name: 'Peanut Butter', quantity: 0, unit: 'g', is_staple: 0, generic_name_id: genericNameIds.peanut_butter },
+  { id: ingredientIds.lime, item_name: 'Lime', quantity: 0, unit: 'pcs', is_staple: 0, generic_name_id: genericNameIds.lime },
+  { id: ingredientIds.bun, item_name: 'Bun', quantity: 0, unit: 'pcs', is_staple: 0, generic_name_id: genericNameIds.bread },
 ].map(item => {
   ingredientToPantryId[item.item_name] = item.id;
   return item;
