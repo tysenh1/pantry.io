@@ -33,7 +33,7 @@ export const barcodeTest = async (
   try {
     const barcodeResult = await itemService.handleBarcodeLookup(req.body.code)
 
-    res.status(200).json(successResponse(barcodeResult, "Result"))
+    res.status(200).json(barcodeResult)
   } catch (err) {
     next(err)
   }

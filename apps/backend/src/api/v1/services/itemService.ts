@@ -2,7 +2,7 @@ import type { ItemInfo } from '../../../../../shared/types.ts';
 import { db } from '../config/db.ts';
 import type { OFFResponse } from '../types.ts';
 import { randomUUID } from 'crypto';
-import { OpenFoodFacts } from '@openfoodfacts/openfoodfacts-nodejs'
+import { type ProductV2 } from '@openfoodfacts/openfoodfacts-nodejs'
 
 const CONVERSION_RATES: Record<string, number> = {
   "lb": 453.59,
@@ -26,8 +26,7 @@ function parseListFromString(stringToParse: string): string[] {
   return stringToParse.split(',')
 }
 
-function parseUnit(item: OFFResponse) {
-  const product = item.product;
+function parseUnit(product) {
 
   if (product.product_quantity_unit) {
     return product.product_quantity_unit
@@ -46,8 +45,6 @@ export const handleBarcodeLookup = async (barcode: string) => {
 
   console.log(barcode)
 
-  const client = new OpenFoodFacts(globalThis.fetch)
-
   try {
     const localItem: any = await db.prepare('SELECT * FROM item WHERE barcode = ?').get(barcode);
 
@@ -57,9 +54,15 @@ export const handleBarcodeLookup = async (barcode: string) => {
       return [localItem.unit_size, localItem.unit_type];
     }
 
-    const response = await client.getProductV3(barcode);
+    const response = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
+    const data: OFFResponse = await response.json();
 
-    return response;
+    if (data.status == 0) {
+      return "nothing found broski"
+    }
+
+
+    return data;
 
     // if (response.data?.result) {
     //

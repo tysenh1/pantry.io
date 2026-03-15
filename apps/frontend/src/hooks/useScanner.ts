@@ -55,7 +55,7 @@ export function useScanner(socket: Socket) {
 
             },
             (text) => {
-              socket.emit('barcode', text)
+              socket.emit('barcode', text.padStart(13, "0"))
               setIsScanning(false);
               setIsLoading(false);
               setLastResult(null);

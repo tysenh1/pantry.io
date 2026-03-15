@@ -5,7 +5,7 @@
   "main": "index.js",
   "pnpm": {
     "onlyBuiltDependencies": [
-      "sqlite3"
+      "better-sqlite3"
     ]
   },
   "scripts": {

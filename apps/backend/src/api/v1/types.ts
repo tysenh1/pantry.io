@@ -1,3 +1,5 @@
+import { ProductV2 } from "@openfoodfacts/openfoodfacts-nodejs";
+
 export interface PantryItem {
   item_name: string;
   quantity: number;
@@ -34,7 +36,7 @@ export interface OFFResponse {
   code: string;
   status: number;
   status_verbose: string;
-  product: OFFProductResponse;
+  product: ProductV2;
 }
 
 export interface OFFProductResponse {
