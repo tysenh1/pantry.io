@@ -7,6 +7,8 @@ router.get("/", itemController.getItems)
 
 router.post("/", itemController.createItem);
 
+router.post('/barcodeTest', itemController.barcodeTest)
+
 router.put("/:id", itemController.updateItem);
 
 export default router;

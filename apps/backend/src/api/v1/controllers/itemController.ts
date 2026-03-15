@@ -25,6 +25,19 @@ export const createItem = async (
   }
 }
 
+export const barcodeTest = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const barcodeResult = await itemService.handleBarcodeLookup(req.body.code)
+
+    res.status(200).json(successResponse(barcodeResult, "Result"))
+  } catch (err) {
+    next(err)
+  }
+}
 
 export const updateItem = async (
   req: Request,

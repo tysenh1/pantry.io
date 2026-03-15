@@ -67,7 +67,7 @@ const ingredientIds = {
   bun: uuidv4()
 }
 
-const genericNameIds = {
+export const genericNameIds = {
   // Essential Proteins
   chicken: uuidv4(),
   beef: uuidv4(),
@@ -141,7 +141,7 @@ const genericNameIds = {
   sugar: uuidv4(),
   brown_sugar: uuidv4(),
   baking_powder: uuidv4(),
-  baking_disoda: uuidv4(),
+  baking_soda: uuidv4(),
   yeast: uuidv4(),
   vanilla: uuidv4(),
   cinnamon: uuidv4(),
@@ -160,7 +160,8 @@ const genericNameIds = {
   peanut_butter: uuidv4(),
   corn: uuidv4(),
   peas: uuidv4(),
-  artichoke: uuidv4()
+  artichoke: uuidv4(),
+  chocolate: uuidv4()
 };
 
 export const seedGenericNames = [
@@ -196,18 +197,67 @@ export const seedGenericNames = [
   { id: genericNameIds.bell_pepper, name: 'Bell Pepper' },
   { id: genericNameIds.broccoli, name: 'Broccoli' },
   { id: genericNameIds.spinach, name: 'Spinach' },
-  { id: genericNameIds.lemon, name: 'Lemon' },
+  { id: genericNameIds.lettuce, name: 'Lettuce' },
+  { id: genericNameIds.cucumber, name: 'Cucumber' },
+  { id: genericNameIds.zucchini, name: 'Zucchini' },
+  { id: genericNameIds.mushroom, name: 'Mushroom' },
+  { id: genericNameIds.cabbage, name: 'Cabbage' },
   { id: genericNameIds.ginger, name: 'Ginger' },
+  { id: genericNameIds.avocado, name: 'Avocado' },
+  { id: genericNameIds.apple, name: 'Apple' },
+  { id: genericNameIds.banana, name: 'Banana' },
+  { id: genericNameIds.lemon, name: 'Lemon' },
+  { id: genericNameIds.lime, name: 'Lime' },
 
   // Pantry
   { id: genericNameIds.rice, name: 'Rice' },
   { id: genericNameIds.flour, name: 'Flour' },
   { id: genericNameIds.pasta, name: 'Pasta' },
+  { id: genericNameIds.bread, name: "Bread" },
+  { id: genericNameIds.oats, name: 'Oats' },
+  { id: genericNameIds.quinoa, name: 'Quinoa' },
+  { id: genericNameIds.tortilla, name: 'Tortilla' },
+  { id: genericNameIds.breadcrumbs, name: 'Breadcrumbs' },
+
+
   { id: genericNameIds.olive_oil, name: 'Olive Oil' },
+  { id: genericNameIds.vegetable_oil, name: "Vegetable Oil" },
+  { id: genericNameIds.soy_sauce, name: "Soy Sauce" },
+  { id: genericNameIds.vinegar, name: "Vinegar" },
+  { id: genericNameIds.ketchup, name: 'Ketchup' },
+  { id: genericNameIds.mustard, name: 'Mustard' },
+  { id: genericNameIds.mayonnaise, name: "Mayonnaise" },
+  { id: genericNameIds.hot_sauce, name: "Hot Sauce" },
+  { id: genericNameIds.honey, name: "Honey" },
+  { id: genericNameIds.maple_syrup, name: "Maple Syrup" },
+
+
   { id: genericNameIds.salt, name: 'Salt' },
+  { id: genericNameIds.black_pepper, name: "Black Pepper" },
   { id: genericNameIds.sugar, name: 'Sugar' },
+  { id: genericNameIds.brown_sugar, name: "Brown Sugar" },
+  { id: genericNameIds.baking_powder, name: "Baking Powder" },
+  { id: genericNameIds.baking_soda, name: "Baking Soda" },
+  { id: genericNameIds.yeast, name: "Yeast" },
+  { id: genericNameIds.vanilla, name: "Vanilla" },
+  { id: genericNameIds.cinnamon, name: "Cinnamon" },
+  { id: genericNameIds.cumin, name: "Cumin" },
+  { id: genericNameIds.paprika, name: "Paprika" },
+  { id: genericNameIds.chili_powder, name: "Chili Powder" },
+  { id: genericNameIds.oregano, name: "Oregano" },
+
+
   { id: genericNameIds.chickpeas, name: 'Chickpeas' },
-  { id: genericNameIds.coconut_milk, name: 'Coconut Milk' }
+  { id: genericNameIds.black_beans, name: "Black Beans" },
+  { id: genericNameIds.lentils, name: "Lentils" },
+  { id: genericNameIds.coconut_milk, name: 'Coconut Milk' },
+  { id: genericNameIds.tomato_sauce, name: "Tomato Sauce" },
+  { id: genericNameIds.broth, name: "Broth" },
+  { id: genericNameIds.peanut_butter, name: "Peanut Butter" },
+  { id: genericNameIds.corn, name: "Corn" },
+  { id: genericNameIds.peas, name: "Peas" },
+  { id: genericNameIds.artichoke, name: "Artichoke" },
+  { id: genericNameIds.chocolate, name: "Chocolate" }
 ];
 
 // Track ingredient-to-pantry-ID mapping for recipe_ingredients table

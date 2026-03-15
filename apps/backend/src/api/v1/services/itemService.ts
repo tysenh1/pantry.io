@@ -2,6 +2,7 @@ import type { ItemInfo } from '../../../../../shared/types.ts';
 import { db } from '../config/db.ts';
 import type { OFFResponse } from '../types.ts';
 import { randomUUID } from 'crypto';
+import { OpenFoodFacts } from '@openfoodfacts/openfoodfacts-nodejs'
 
 const CONVERSION_RATES: Record<string, number> = {
   "lb": 453.59,
@@ -43,37 +44,42 @@ function parseUnit(item: OFFResponse) {
 
 export const handleBarcodeLookup = async (barcode: string) => {
 
+  console.log(barcode)
+
+  const client = new OpenFoodFacts(globalThis.fetch)
 
   try {
-    const localItem: any = await new Promise((resolve) => {
-      db.get('SELECT common_name FROM item WHERE id = ?', [barcode], (_, row) => resolve(row));
-    });
+    const localItem: any = await db.prepare('SELECT * FROM item WHERE barcode = ?').get(barcode);
 
-    if (localItem) return localItem.common_name;
+    console.log(localItem)
 
-    const response = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
-    const data: OFFResponse = await response.json();
-
-    console.log(data)
-
-    if (data.status === 1) {
-      // const item = db
-      // const name = data.product.product_name || "Unknown Item";
-      // Upsert into SQLite here
-      // return name;
-
-
-      const productInfo: ItemInfo = {
-        code: data.code,
-        allergens: data.product.allergens_tags ? data.product.allergens_tags : parseListFromString(data?.product.allergens || ''),
-        genericName: data.product.generic_name ? data.product.generic_name : data.product.generic_name_en,
-        imageUrl: data.product.image_small_url ? data.product.image_small_url : data.product.image_url,
-        productName: data.product.product_name ? data.product.product_name : data.product.product_name_en,
-        quantity: data.product.quantity ? data.product.quantity : '',
-        unit: parseUnit(data)
-      }
-      return productInfo
+    if (localItem) {
+      return [localItem.unit_size, localItem.unit_type];
     }
+
+    const response = await client.getProductV3(barcode);
+
+    return response;
+
+    // if (response.data?.result) {
+    //
+    //   // const item = db
+    //   // const name = data.product.product_name || "Unknown Item";
+    //   // Upsert into SQLite here
+    //   // return name;
+    //
+    //
+    //   const productInfo: ItemInfo = {
+    //     code: data.product,
+    //     allergens: data?. ? data.product.allergens_tags : parseListFromString(data?.product.allergens || ''),
+    //     genericName: data.product.generic_name ? data.product.generic_name : data.product.generic_name_en,
+    //     imageUrl: data.product.image_small_url ? data.product.image_small_url : data.product.image_url,
+    //     productName: data.product.product_name ? data.product.product_name : data.product.product_name_en,
+    //     quantity: data.product.quantity ? data.product.quantity : '',
+    //     unit: parseUnit(data)
+    //   }
+    //   return productInfo
+    // }
   } catch (error) {
     console.error("OFF API Error", error);
   }
@@ -84,7 +90,7 @@ export const handleBarcodeLookup = async (barcode: string) => {
 export const createItem = (itemInfo: ItemInfo) => {
   const itemId = randomUUID();
   const sql = `
-    INSERT INTO item (id, barcode, product_name, generic_name, brand, unit_size, unit_type, image_url)
+    INSERT INTO item (id, barcode, product_name, generic_name_id, brand, unit_size, unit_type, image_url)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?);
   `
 
@@ -99,12 +105,12 @@ export const createItem = (itemInfo: ItemInfo) => {
     itemInfo.imageUrl || ''
   ]
 
-  db.run(sql, params, (err) => {
-    if (err) {
-      console.error("DB Error:", err)
-      throw new Error(err.message)
-    }
-  })
+  try {
+    db.prepare(sql).run(params);
+  } catch (err: any) {
+    console.error("DB Error:", err);
+    throw new Error(err.message);
+  }
 
   if (itemInfo.allergens) {
     for (const allergen of itemInfo.allergens) {
