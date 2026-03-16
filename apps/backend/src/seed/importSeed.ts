@@ -3,7 +3,7 @@ import { seedPantry, seedRecipes, seedRecipeIngredients, seedGenericNames, gener
 import path from 'path';
 import fs from 'fs';
 
-const db = sqlite3('./db.db');
+const db = sqlite3('/home/tysenh1/Coding/pantry.io/apps/backend/db.db');
 
 const schemaPath = '/home/tysenh1/Coding/pantry.io/apps/backend/';
 const schemaSql = fs.readFileSync(schemaPath + 'schema.sql', 'utf8');
@@ -13,13 +13,13 @@ const schemaSql = fs.readFileSync(schemaPath + 'schema.sql', 'utf8');
 const runImport = db.transaction(() => {
   console.log('🔄 Starting kitchen database seeding...');  // 1. Drop and recreate tables
 
-  db.exec('DROP TABLE IF EXISTS item');
-  db.exec('DROP TABLE IF EXISTS item_allergens');
-  db.exec('DROP TABLE IF EXISTS pantry');
-  db.exec('DROP TABLE IF EXISTS recipe_ingredients');
-  db.exec('DROP TABLE IF EXISTS recipes');
-  db.exec('DROP TABLE IF EXISTS allergens');
-  db.exec('DROP TABLE IF EXISTS generic_name');
+  db.exec('DROP TABLE IF EXISTS item;');
+  db.exec('DROP TABLE IF EXISTS item_allergens;');
+  db.exec('DROP TABLE IF EXISTS pantry;');
+  db.exec('DROP TABLE IF EXISTS recipe_ingredients;');
+  db.exec('DROP TABLE IF EXISTS recipes;');
+  db.exec('DROP TABLE IF EXISTS allergens;');
+  db.exec('DROP TABLE IF EXISTS generic_name;');
 
   db.exec(schemaSql);
 
@@ -44,7 +44,7 @@ const runImport = db.transaction(() => {
   }
 
   db.prepare("INSERT INTO item (id, barcode, product_name, generic_name_id, brand, unit_size, unit_type, image_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
-    .run("THISISAUUID", "68437389693", "Açai & blueberry flavours", genericNameIds.chocolate, "Brookside", 850, "g", "");
+    .run("THISISAUUID", "0068437389693", "Açai & blueberry flavours", genericNameIds.chocolate, "Brookside", 850, "g", "");
 
   console.log("✅ Database seeded successfully!");
   console.log(`📦 Pantry items: ${seedPantry.length}`);

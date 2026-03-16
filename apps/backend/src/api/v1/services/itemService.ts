@@ -3,6 +3,7 @@ import { db } from '../config/db.ts';
 import type { OFFResponse } from '../types.ts';
 import { randomUUID } from 'crypto';
 import { type ProductV2 } from '@openfoodfacts/openfoodfacts-nodejs'
+import { parseUnit, parseQuantity } from '../utils/itemUtils.ts';
 
 const CONVERSION_RATES: Record<string, number> = {
   "lb": 453.59,
@@ -10,10 +11,9 @@ const CONVERSION_RATES: Record<string, number> = {
   "kg": 1000,
   "l": 1000,
   "ml": 1,
-  "g": 1
+  "g": 1,
+  "pcs": 1
 };
-
-const UNIT_REGEX = /^([0-9.]+)\s*([a-zA-Z]+)/;
 
 function normalizeToGrams(amount: number, unit: string): number {
   const rate = CONVERSION_RATES[unit.toLowerCase()];
@@ -26,45 +26,42 @@ function parseListFromString(stringToParse: string): string[] {
   return stringToParse.split(',')
 }
 
-function parseUnit(product) {
-
-  if (product.product_quantity_unit) {
-    return product.product_quantity_unit
-  } else if (product.net_weight_unit) {
-    return product.net_weight_unit
-  } else if (product.product_quantity_string) {
-    const regexArray = product.product_quantity_string.match(UNIT_REGEX)
-    if (!regexArray) return '';
-    return regexArray[1] ? regexArray[1] : ''
-  } else {
-    return ''
-  }
-}
-
 export const handleBarcodeLookup = async (barcode: string) => {
 
   console.log(barcode)
 
   try {
+
     const localItem: any = await db.prepare('SELECT * FROM item WHERE barcode = ?').get(barcode);
 
     console.log(localItem)
 
-    if (localItem) {
-      return [localItem.unit_size, localItem.unit_type];
-    }
+    // if (localItem) {
+    //   return localItem;
+    // }
 
     const response = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
     const data: OFFResponse = await response.json();
 
     if (data.status == 0) {
-      return "nothing found broski"
+      return {
+        code: barcode,
+        allergens: '',
+        genericName: '',
+        imageUrl: '',
+        productName: '',
+        quantity: '',
+        unit: ''
+      }
     }
 
+    const convertedUnit = parseUnit(data.product)
+    const quantity = parseQuantity(data.product)
 
-    return data;
+    //Need to upsert here (like the stuff done in the comments below)
 
-    // if (response.data?.result) {
+    return data
+
     //
     //   // const item = db
     //   // const name = data.product.product_name || "Unknown Item";
@@ -82,7 +79,6 @@ export const handleBarcodeLookup = async (barcode: string) => {
     //     unit: parseUnit(data)
     //   }
     //   return productInfo
-    // }
   } catch (error) {
     console.error("OFF API Error", error);
   }
