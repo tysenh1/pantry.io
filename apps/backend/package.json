@@ -24,6 +24,7 @@
     "@openfoodfacts/openfoodfacts-nodejs": "2.0.0-alpha.29",
     "better-sqlite3": "^12.8.0",
     "ollama": "^0.6.3",
-    "socket.io": "^4.8.3"
+    "socket.io": "^4.8.3",
+    "tsx": "^4.21.0"
   }
 }

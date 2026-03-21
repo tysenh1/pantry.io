@@ -64,7 +64,8 @@ const ingredientIds = {
   avocado: uuidv4(),
   peanutButter: uuidv4(),
   lime: uuidv4(),
-  bun: uuidv4()
+  bun: uuidv4(),
+  chocolate: uuidv4()
 }
 
 export const genericNameIds = {
@@ -314,6 +315,7 @@ export const seedPantry: Pantry[] = [
   { id: ingredientIds.peanutButter, item_name: 'Peanut Butter', quantity: 0, unit: 'g', is_staple: 0, generic_name_id: genericNameIds.peanut_butter },
   { id: ingredientIds.lime, item_name: 'Lime', quantity: 0, unit: 'pcs', is_staple: 0, generic_name_id: genericNameIds.lime },
   { id: ingredientIds.bun, item_name: 'Bun', quantity: 0, unit: 'pcs', is_staple: 0, generic_name_id: genericNameIds.bread },
+  { id: ingredientIds.chocolate, item_name: "Chocolate Snacks", quantity: 0, unit: 'g', is_staple: 0, generic_name_id: genericNameIds.chocolate }
 ].map(item => {
   ingredientToPantryId[item.item_name] = item.id;
   return item;

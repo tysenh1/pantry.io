@@ -4,6 +4,8 @@ import type { OFFResponse } from '../types.ts';
 import { randomUUID } from 'crypto';
 import { type ProductV2 } from '@openfoodfacts/openfoodfacts-nodejs'
 import { parseUnit, parseQuantity } from '../utils/itemUtils.ts';
+import { ExternalLookupError } from '../errors/errors.ts';
+import { ERROR_CODE } from '../../../constants/errorConstants.ts';
 
 const CONVERSION_RATES: Record<string, number> = {
   "lb": 453.59,
@@ -29,60 +31,69 @@ function parseListFromString(stringToParse: string): string[] {
 export const handleBarcodeLookup = async (barcode: string) => {
 
   console.log(barcode)
+  const localGenericItemId = await db.prepare(`
+    SELECT generic_name_id FROM item WHERE barcode = ?
+  `).get(barcode);
 
-  try {
+  if (!!localGenericItemId) {
+    const genericId = localGenericItemId.generic_name_id
+    const localPantryItem = await db.prepare(`
+      SELECT * FROM pantry WHERE generic_name_id = ?
+`).get(genericId)
 
-    const localItem: any = await db.prepare('SELECT * FROM item WHERE barcode = ?').get(barcode);
-
-    console.log(localItem)
-
-    // if (localItem) {
-    //   return localItem;
-    // }
-
-    const response = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
-    const data: OFFResponse = await response.json();
-
-    if (data.status == 0) {
-      return {
-        code: barcode,
-        allergens: '',
-        genericName: '',
-        imageUrl: '',
-        productName: '',
-        quantity: '',
-        unit: ''
-      }
-    }
-
-    const convertedUnit = parseUnit(data.product)
-    const quantity = parseQuantity(data.product)
-
-    //Need to upsert here (like the stuff done in the comments below)
-
-    return data
-
-    //
-    //   // const item = db
-    //   // const name = data.product.product_name || "Unknown Item";
-    //   // Upsert into SQLite here
-    //   // return name;
-    //
-    //
-    //   const productInfo: ItemInfo = {
-    //     code: data.product,
-    //     allergens: data?. ? data.product.allergens_tags : parseListFromString(data?.product.allergens || ''),
-    //     genericName: data.product.generic_name ? data.product.generic_name : data.product.generic_name_en,
-    //     imageUrl: data.product.image_small_url ? data.product.image_small_url : data.product.image_url,
-    //     productName: data.product.product_name ? data.product.product_name : data.product.product_name_en,
-    //     quantity: data.product.quantity ? data.product.quantity : '',
-    //     unit: parseUnit(data)
-    //   }
-    //   return productInfo
-  } catch (error) {
-    console.error("OFF API Error", error);
+    return localPantryItem
   }
-  return "Unknown Item";
+  // const localItem: any = await db.prepare(`
+  //     SELECT
+  //       i.barcode,
+  //       i.product_name,
+  //       g.generic_name,
+  //       i.brand,
+  //       i.unit_size,
+  //       i.unit_type,
+  //       i.image_url
+  //     FROM item i
+  //     JOIN generic_name g ON i.generic_name_id = g.id
+  //     WHERE i.barcode = ?
+  //   `).get(barcode);
+  //
+  // if (localItem) {
+  //   return localItem;
+  // }
+
+  const response = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
+  const data: OFFResponse = await response.json();
+
+  return data
+
+  if (data.status == 0) {
+    throw new ExternalLookupError(barcode, ERROR_CODE.EXTERNAL_LOOKUP_FAILED_CODE)
+  }
+
+  // const convertedUnit = parseUnit(data.product)
+  // const quantity = parseQuantity(data.product)
+
+  //Need to upsert here (like the stuff done in the comments below)
+
+
+
+  // const item = db
+  // const name = data.product.product_name || "Unknown Item";
+  // Upsert into SQLite here
+  // return name;
+
+
+  const productInfo: ItemInfo = {
+    code: data.product.code,
+    productName: data.product.product_name ? data.product.product_name : data.product.product_name_en,
+    genericName: data.product.generic_name ? data.product.generic_name : data.product.generic_name_en,
+    brand: data.product.brands ? data.product.brands?.split(',')[0] : '',
+    allergens: data?.product.allergens ? data.product.allergens_tags : parseListFromString(data?.product.allergens || ''),
+    imageUrl: data.product.image_small_url ? data.product.image_small_url : data.product.image_url,
+    quantity: data.product.quantity ? data.product.quantity : '',
+    unit: parseUnit(data.product)
+  }
+  return productInfo
 };
 
 
@@ -92,6 +103,9 @@ export const createItem = (itemInfo: ItemInfo) => {
     INSERT INTO item (id, barcode, product_name, generic_name_id, brand, unit_size, unit_type, image_url)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?);
   `
+
+  const convertedUnit = parseUnit(itemInfo.unit as string)
+  const quantity = parseQuantity
 
   const params = [
     itemId,

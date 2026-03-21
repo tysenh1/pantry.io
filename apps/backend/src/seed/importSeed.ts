@@ -46,6 +46,7 @@ const runImport = db.transaction(() => {
   db.prepare("INSERT INTO item (id, barcode, product_name, generic_name_id, brand, unit_size, unit_type, image_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
     .run("THISISAUUID", "0068437389693", "Açai & blueberry flavours", genericNameIds.chocolate, "Brookside", 850, "g", "");
 
+
   console.log("✅ Database seeded successfully!");
   console.log(`📦 Pantry items: ${seedPantry.length}`);
   console.log(`🍳 Recipes: ${seedRecipes.length}`);
