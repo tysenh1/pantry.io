@@ -99,3 +99,11 @@ export interface OFFProductResponse {
   product_quantity_unit: string;
   net_weight_unit?: string;
 }
+
+export interface QuantityUpdateInfo {
+  quantity: number;
+  name: string;
+  primary_unit: string;
+  weight_per_piece: number;
+  id: string;
+}

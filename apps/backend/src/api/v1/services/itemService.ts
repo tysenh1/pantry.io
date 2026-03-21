@@ -4,24 +4,11 @@ import { db } from '../config/db.ts';
 import type { OFFResponse } from '../types.ts';
 import { randomUUID } from 'crypto';
 import { type ProductV2 } from '@openfoodfacts/openfoodfacts-nodejs'
-import { parseUnit, parseQuantity, findGenericMatch } from '../utils/itemUtils.ts';
+import { parseUnit, parseQuantity, findGenericMatch, updateQuantity } from '../utils/itemUtils.ts';
 import { ExternalLookupError } from '../errors/errors.ts';
 import { ERROR_CODE } from '../../../constants/errorConstants.ts';
 
-const CONVERSION_RATES: Record<string, number> = {
-  "lb": 453.59,
-  "oz": 28.35,
-  "kg": 1000,
-  "l": 1000,
-  "ml": 1,
-  "g": 1,
-  "pcs": 1
-};
 
-function normalizeToGrams(amount: number, unit: string): number {
-  const rate = CONVERSION_RATES[unit.toLowerCase()];
-  return rate ? amount * rate : amount;
-}
 
 function parseListFromString(stringToParse: string): string[] {
   if (!stringToParse) return [];
@@ -38,21 +25,7 @@ export const handleBarcodeLookup = async (barcode: string) => {
 
   if (localItem) {
     // return localItem
-    const quantityUpdateInfo = await db.prepare(`
-SELECT p.quantity, i.unit_size, i.unit_type, g.name, g.primary_unit, g.weight_per_piece, g.id FROM item i JOIN pantry p ON p.generic_name_id = i.generic_name_id JOIN generic_name g ON i.generic_name_id = g.id WHERE i.barcode = ?
-`).get(barcode)
-    const newQuantity = quantityUpdateInfo.quantity + quantityUpdateInfo.unit_size
-    console.log(quantityUpdateInfo)
-    console.log(quantityUpdateInfo.quantity, quantityUpdateInfo.unit_size, newQuantity)
-
-    await db.prepare(`
-UPDATE pantry SET quantity = ? WHERE generic_name_id = ?
-`).run(newQuantity, quantityUpdateInfo.id)
-
-    const updatedItem = await db.prepare(`
-SELECT * FROM pantry WHERE generic_name_id = ?;
-`).get(quantityUpdateInfo.id)
-    return updatedItem
+    return updateQuantity(localItem)
   }
 
   const response = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);

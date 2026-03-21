@@ -2,6 +2,7 @@ import { type ProductV2 } from "@openfoodfacts/openfoodfacts-nodejs"
 import { db } from "../config/db";
 import Fuse, { FuseResult } from 'fuse.js'
 import { GenericNameInfo } from "../../../../../shared/types";
+import { Item, QuantityUpdateInfo } from "../types";
 
 const UNIT_REGEX = /^([0-9.]+)\s*([a-zA-Z]+)/;
 
@@ -78,4 +79,56 @@ export const findGenericMatch = (productName: string = '', categoriesString: str
   }
 
   return searchResults;
+}
+
+export const updateQuantity = async (item: Item) => {
+  try {
+    const quantityUpdateInfo: QuantityUpdateInfo = await db.prepare(`
+SELECT p.quantity, g.name, g.primary_unit, g.weight_per_piece, g.id FROM generic_name g JOIN pantry p ON p.generic_name_id = g.id WHERE g.id = ?
+`).get(item.generic_name_id)
+    const newQuantity = getNewQuantity(quantityUpdateInfo, item.unit_size, item.unit_type)
+
+    await db.prepare(`
+  UPDATE pantry SET quantity = ? WHERE generic_name_id = ?
+  `).run(newQuantity, quantityUpdateInfo.id)
+
+    const updatedItem = await db.prepare(`
+  SELECT * FROM pantry WHERE generic_name_id = ?;
+  `).get(quantityUpdateInfo.id)
+    return updatedItem
+  } catch (e) {
+    return false
+  }
+}
+
+const getNewQuantity = (info: QuantityUpdateInfo, unitSize: number, unitType: string) => {
+
+  if (info.primary_unit == unitType) {
+    return info.quantity + unitSize
+  }
+
+  if (unitType === 'pcs' && info.primary_unit !== 'pcs') {
+    const amountGrams = unitSize * info.weight_per_piece
+    // This is mostly here as a safeguard in case I add more units that the pantry can have, right now its just ml, g and pcs
+    const rate = CONVERSION_RATES[info.primary_unit.toLowerCase()]
+    return rate ? amountGrams / rate : amountGrams
+  }
+
+  return normalizeQuantity(unitSize, unitType)
+
+}
+
+const CONVERSION_RATES: Record<string, number> = {
+  "lb": 453.59,
+  "oz": 28.35,
+  "kg": 1000,
+  "l": 1000,
+  "ml": 1,
+  "g": 1,
+  "pcs": 1
+};
+
+function normalizeQuantity(amount: number, unit: string): number {
+  const rate = CONVERSION_RATES[unit.toLowerCase()];
+  return rate ? amount * rate : amount;
 }
