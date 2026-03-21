@@ -1,5 +1,5 @@
 import type { BarcodeLookupResponse, GenericNameInfo, ItemInfo } from '../../../../../shared/types.ts';
-import type { Item } from '../types.ts';
+import type { GenericName, Item } from '../types.ts';
 import { db } from '../config/db.ts';
 import type { OFFResponse } from '../types.ts';
 import { randomUUID } from 'crypto';
@@ -24,14 +24,16 @@ export const handleBarcodeLookup = async (barcode: string): Promise<BarcodeLooku
   `).get(barcode);
 
   if (localItem) {
-    const newItemQuantity = await incrementQuantity(localItem)
+    const itemWithNewQuantity = await incrementQuantity(localItem)
+
+    const genericName: GenericName = await db.prepare('SELECT * FROM generic_name WHERE id = ?').get(itemWithNewQuantity.generic_name_id)
 
     const itemInfo: ItemInfo = {
-      barcode: barcode,
-      productName: localItem.product_name,
-      genericName: { id: '', name: '' },
-      unitSize: newItemQuantity,
-      unitType: localItem.unit_type
+      barcode: itemWithNewQuantity.barcode,
+      productName: itemWithNewQuantity.product_name,
+      genericName: [{ id: genericName.id, name: genericName.name }],
+      unitSize: itemWithNewQuantity.unit_size,
+      unitType: itemWithNewQuantity.unit_type
     }
 
     return {
@@ -69,22 +71,20 @@ export const handleBarcodeLookup = async (barcode: string): Promise<BarcodeLooku
 };
 
 
-export const createItem = (itemInfo: Item) => {
+export const createItem = (itemInfo: ItemInfo) => {
   const itemId = randomUUID();
   const sql = `
-    INSERT INTO item (id, barcode, product_name, generic_name_id, brand, unit_size, unit_type, image_url)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+    INSERT INTO item (id, barcode, product_name, generic_name_id, unit_size, unit_type)
+    VALUES (?, ?, ?, ?, ?, ?);
   `
 
   const params = [
     itemId,
-    itemInfo.code,
-    itemInfo.productName || '',
-    itemInfo.genericName || '',
-    itemInfo.brand || '',
-    itemInfo.quantity || '',
-    itemInfo.unit || '',
-    itemInfo.imageUrl || ''
+    itemInfo.barcode,
+    itemInfo.productName,
+    itemInfo.genericName[0].id,
+    itemInfo.unitSize,
+    itemInfo.unitType,
   ]
 
   try {
@@ -94,13 +94,5 @@ export const createItem = (itemInfo: Item) => {
     throw new Error(err.message);
   }
 
-  if (itemInfo.allergens) {
-    for (const allergen of itemInfo.allergens) {
-      const allergenId = randomUUID()
-      console.log(allergen)
-      //       const sql2 = `
-      //         INSERT 
-      // `
-    }
-  }
+
 }

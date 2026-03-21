@@ -1,13 +1,54 @@
 import { fetchItem } from "@/apis/barcodeService";
-import { type ItemInfo } from "../../../../../shared/types"
+import { type BarcodeLookupResponse, type GenericNameInfo, type ItemInfo } from "../../../../../shared/types"
 import { useState, useEffect } from "react"
 
-export function RenderBarcodeResult({ lastResult, setLastResult }: { lastResult: ItemInfo | null, setLastResult: React.Dispatch<React.SetStateAction<ItemInfo | null>> }) {
+export function RenderBarcodeResult({ lastResult, setLastResult, setIsScanning, setIsScannerVisible }: {
+  lastResult: BarcodeLookupResponse,
+  setLastResult: React.Dispatch<React.SetStateAction<BarcodeLookupResponse | null>>,
+  setIsScanning: React.Dispatch<React.SetStateAction<boolean>>,
+  setIsScannerVisible: React.Dispatch<React.SetStateAction<boolean>>
+}) {
+  const [selectValue, setSelectValue] = useState(lastResult.item.genericName[0].id)
+
+  const genericNameInput = () => {
+    if (Array.isArray(lastResult.item.genericName) && lastResult.item.genericName.length > 1) {
+      return (
+        <select onChange={handleSelectChange}>
+          {Array.isArray(lastResult.item.genericName) &&
+            lastResult.item.genericName.map(name => (
+              <option key={name.id} value={name.id}>
+                {name.name}
+              </option>
+            ))
+          }
+        </select>
+      )
+    } else {
+      const genericName = lastResult.item.genericName[0]
+      return (
+        // Disabling this for now until I find a way to query the backend for all generic names efficiently
+        // Also assuming there is something in the array but I'll deal with that later
+        <select onChange={handleSelectChange} disabled={true}>
+
+          <option key={genericName.id} value={genericName.id}>
+            {genericName.name}
+          </option>
+        </select>
+      )
+    }
+  }
+
   const handleTextChange = (e) => {
     const { name, value } = e.target;
+    // @ts-expect-error This page only renders if lastResult isn't null so this can be ignored. Throws more errors if the type isn't marked as possibly null
     setLastResult(prev => ({
-      ...prev,
-      [name]: value
+      doesItemExist: prev?.doesItemExist,
+      item: {
+        ...prev?.item,
+        [name]: value
+      }
+      // ...prev,
+      // [name]: value
     }))
   }
 
@@ -16,7 +57,17 @@ export function RenderBarcodeResult({ lastResult, setLastResult }: { lastResult:
 
     try {
       if (lastResult) {
-        fetchItem(lastResult)
+        // Technically this can be undefined but its sorting through the ids in the genericName array so I don't think it can actually be undefined
+        const genericName = lastResult.item.genericName.find(item => item.id == selectValue) as GenericNameInfo
+        // @ts-expect-error Same reason as above
+        setLastResult(prev => ({
+          doesItemExist: prev?.doesItemExist,
+          item: {
+            ...prev?.item,
+            genericName: [genericName],
+          }
+        }))
+        fetchItem(lastResult.item)
       }
     } catch (err) {
       alert(err)
@@ -24,38 +75,48 @@ export function RenderBarcodeResult({ lastResult, setLastResult }: { lastResult:
 
   }
 
+  const handleSelectChange = (e) => {
+    const { value } = e.target
+
+    setSelectValue(value)
+  }
+
   useEffect(() => {
     console.log(lastResult)
   }, [lastResult])
-  if (lastResult) {
+  if (lastResult && lastResult.doesItemExist === false) {
     return (
       <form className="[&>label>input]:border [&>label>input]:border-white" onSubmit={handleSubmit}>
         <label>Generic Name:
-          <select>
-            {Array.isArray(lastResult.genericName) &&
-              lastResult.genericName.map(name => (
-                <option key={name.id} value={name.id}>
-                  {name.name}
-                </option>
-              ))
-            }
+          <select onChange={handleSelectChange}>
+            {genericNameInput()}
           </select>
         </label>
         <label>Barcode:
-          <input value={lastResult.barcode} name="code" onChange={handleTextChange}></input>
+          <input value={lastResult.item.barcode} name="barcode" onChange={handleTextChange}></input>
         </label>
 
         <label>Product Name:
-          <input value={lastResult.productName} name="productName" onChange={handleTextChange} />
+          <input value={lastResult.item.productName} name="productName" onChange={handleTextChange} />
         </label>
         <label>Quantity:
-          <input value={lastResult.unitSize} name="quantity" onChange={handleTextChange} />
+          <input value={lastResult.item.unitSize} name="unitSize" onChange={handleTextChange} />
         </label>
         <label>Unit:
-          <input value={lastResult.unitType} name="unit" onChange={handleTextChange} />
+          <input value={lastResult.item.unitType} name="unitType" onChange={handleTextChange} />
         </label>
         <button className="bg-white">Submit</button>
       </form>
+    )
+  } else if (lastResult && lastResult.doesItemExist === true) {
+    setIsScanning(false)
+    const genericName = !Array.isArray(lastResult.item.genericName) ? lastResult.item.genericName.name : lastResult.item.genericName[0].name
+    return (
+      <div className="absolute w-[400px] h-[400px] top-1/2 left-1/2 border-white border-2 bg-black">
+
+        <p>You now have {lastResult.item.unitSize} {lastResult.item.unitType} of {genericName} in your pantry!</p>
+        <button onClick={() => { setLastResult(null); setIsScannerVisible(false) }} className="cursor-pointer border border-white">Sounds Good</button>
+      </div >
     )
   } else {
     return <></>

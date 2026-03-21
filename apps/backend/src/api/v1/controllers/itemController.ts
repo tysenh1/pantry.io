@@ -16,6 +16,7 @@ export const createItem = async (
   res: Response,
   next: NextFunction
 ): Promise<void> => {
+  console.log("THIS IS RUNINNG")
   try {
     const newItem = await itemService.createItem(req.body);
 

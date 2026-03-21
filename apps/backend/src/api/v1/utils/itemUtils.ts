@@ -81,18 +81,26 @@ export const findGenericMatch = (productName: string = '', categoriesString: str
   return searchResults;
 }
 
-export const incrementQuantity = async (item: Item): Promise<number> => {
+export const incrementQuantity = async (item: Item): Promise<Item> => {
   const quantityUpdateInfo: QuantityUpdateInfo = await db.prepare(`
-SELECT p.quantity, g.name, g.primary_unit, g.weight_per_piece, g.id FROM generic_name g JOIN pantry p ON p.generic_name_id = g.id WHERE g.id = ?
+SELECT p.quantity, g.primary_unit, g.weight_per_piece FROM generic_name g JOIN pantry p ON p.generic_name_id = g.id WHERE g.id = ?
 `).get(item.generic_name_id)
   const newQuantity = getNewQuantity(quantityUpdateInfo, item.unit_size, item.unit_type)
 
   await db.prepare(`
   UPDATE pantry SET quantity = ? WHERE generic_name_id = ?
-  `).run(newQuantity, quantityUpdateInfo.id)
+  `).run(newQuantity, item.generic_name_id)
 
-  return normalizeQuantity(newQuantity, item.unit_type)
+  const newQuantityWithOldUnit = normalizeQuantity(newQuantity, item.unit_type)
 
+  return {
+    id: item.id,
+    barcode: item.barcode,
+    product_name: item.product_name,
+    generic_name_id: item.generic_name_id,
+    unit_size: newQuantityWithOldUnit,
+    unit_type: item.unit_type
+  }
 }
 
 const getNewQuantity = (info: QuantityUpdateInfo, unitSize: number, unitType: string) => {

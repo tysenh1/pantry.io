@@ -1,34 +1,27 @@
 import { useEffect, useState, useRef } from 'react';
 import { type Socket } from 'socket.io-client';
-import { type Item } from '../../../shared/types';
+import { type BarcodeLookupResponse } from '../../../shared/types';
 import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode';
 
 export function useScanner(socket: Socket) {
   const [isScanning, setIsScanning] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [lastResult, setLastResult] = useState<Item | null>(null)
+  const [lastResult, setLastResult] = useState<BarcodeLookupResponse | null>(null)
   const [isScannerVisible, setIsScannerVisible] = useState<boolean>(false)
   const scannerRef = useRef<Html5Qrcode | null>(null);
 
 
   useEffect(() => {
-    socket.on('barcode_stream', (content: Item) => {
-      barcodeResponseHandler(content, setLastResult)
+    socket.on('barcode_stream', (content: BarcodeLookupResponse) => {
+      setLastResult(content)
       console.log(content)
       setIsLoading(false)
       setIsScannerVisible(true)
     })
 
-    // scannerRef.current = new Html5Qrcode('reader')
 
     return () => {
       socket.off('barcode_stream')
-      // if (scannerRef.current?.isScanning) {
-      //   scannerRef.current
-      //     .stop()
-      //     .then(() => scannerRef.current?.clear())
-      //     .catch((err) => console.error("Failed to stop scanner", err))
-      // }
     }
   }, [])
 
@@ -69,7 +62,7 @@ export function useScanner(socket: Socket) {
       }
     }
 
-    startCamera();
+    // startCamera();
 
     return () => {
       if (scanner?.isScanning) {
@@ -79,68 +72,30 @@ export function useScanner(socket: Socket) {
   }, [isScanning])
 
   // useEffect(() => {
-  //   let scanner: Html5Qrcode | null = null;
-  //   if (isScanning) {
-  //     scanner = new Html5Qrcode(
-  //       "reader",
-  //       {
-  //         fps: 20,
-  //         qrbox: { width: 300, height: 250 },
-  //         aspectRatio: 1.777778,
-  //         formatsToSupport: [
-  //           // Html5QrcodeSupportedFormats.CODE_128,
-  //           // Html5QrcodeSupportedFormats.EAN_13,
-  //           Html5QrcodeSupportedFormats.UPC_A
-  //         ]
-  //       },
-  //       false
-  //     );
+  //   scannerRef.current = new Html5Qrcode("reader");
   //
-  //     scanner.render(
-  //       (text) => {
-  //         socket.emit('barcode', text)
-  //         setIsScanning(false);
-  //         setIsLoading(true);
-  //         setLastResult(null)
-  //       },
-  //       //@ts-expect-error ignore
-  //       (err) => {
-  //         // console.error("Error scanning barcode:", err)
-  //       }
-  //     )
-  //   }
-  //
-  //   return () => {
-  //     if (scanner) {
-  //       scanner.clear().catch(e => console.error("Cleanup error", e))
-  //     }
-  //   }
-  // }, [isScanning])
-  useEffect(() => {
-    scannerRef.current = new Html5Qrcode("reader");
-
-  })
+  // })
 
   return { isScanning, setIsScanning, lastResult, setLastResult, isLoading, isScannerVisible, setIsScannerVisible };
 }
 
-function barcodeResponseHandler(item: Item, setItem: React.Dispatch<React.SetStateAction<Item | null>>) {
-  const newItem: Item = {
-    barcode: '',
-    allergens: [],
-    genericName: '',
-    productName: '',
-    unitSize: 0,
-    unitType: ''
-  }
-  for (const [key, value] of Object.entries(item)) {
-    if (value) {
-      // setItem(prev => ({
-      //   ...prev,
-      //   [key]: value
-      // }))
-      newItem[key] = value
-    }
-  }
-  setItem(newItem)
-}
+// function barcodeResponseHandler(item: Item, setItem: React.Dispatch<React.SetStateAction<Item | null>>) {
+//   const newItem: Item = {
+//     barcode: '',
+//     allergens: [],
+//     genericName: '',
+//     productName: '',
+//     unitSize: 0,
+//     unitType: ''
+//   }
+//   for (const [key, value] of Object.entries(item)) {
+//     if (value) {
+//       // setItem(prev => ({
+//       //   ...prev,
+//       //   [key]: value
+//       // }))
+//       newItem[key] = value
+//     }
+//   }
+//   setItem(newItem)
+// }

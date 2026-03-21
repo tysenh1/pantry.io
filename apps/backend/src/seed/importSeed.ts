@@ -43,8 +43,8 @@ const runImport = db.transaction(() => {
     ingredientStmt.run(ing.recipe_id, ing.ingredient_id, ing.quantity_needed, ing.unit);
   }
 
-  db.prepare("INSERT INTO item (id, barcode, product_name, generic_name_id, unit_size, unit_type) VALUES (?, ?, ?, ?, ?, ?)")
-    .run("THISISAUUID", "0068437389693", "Açai & blueberry flavours", genericNameIds.chocolate, 850, "g");
+  // db.prepare("INSERT INTO item (id, barcode, product_name, generic_name_id, unit_size, unit_type) VALUES (?, ?, ?, ?, ?, ?)")
+  // .run("THISISAUUID", "0068437389693", "Açai & blueberry flavours", genericNameIds.chocolate, 850, "g");
 
 
   console.log("✅ Database seeded successfully!");
