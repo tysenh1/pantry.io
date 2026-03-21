@@ -1,4 +1,4 @@
-import type { ItemInfo } from '../../../../../shared/types.ts';
+import type { Item } from '../../../../../shared/types.ts';
 import { db } from '../config/db.ts';
 import type { OFFResponse } from '../types.ts';
 import { randomUUID } from 'crypto';
@@ -31,17 +31,14 @@ function parseListFromString(stringToParse: string): string[] {
 export const handleBarcodeLookup = async (barcode: string) => {
 
   console.log(barcode)
-  const localGenericItemId = await db.prepare(`
-    SELECT generic_name_id FROM item WHERE barcode = ?
+  const localItem: Item = await db.prepare(`
+    SELECT * FROM item WHERE barcode = ?
   `).get(barcode);
 
-  if (!!localGenericItemId) {
-    const genericId = localGenericItemId.generic_name_id
-    const localPantryItem = await db.prepare(`
-      SELECT * FROM pantry WHERE generic_name_id = ?
-`).get(genericId)
+  return localItem
 
-    return localPantryItem
+  if (localItem) {
+    return localItem
   }
   // const localItem: any = await db.prepare(`
   //     SELECT
@@ -83,7 +80,7 @@ export const handleBarcodeLookup = async (barcode: string) => {
   // return name;
 
 
-  const productInfo: ItemInfo = {
+  const productInfo: Item = {
     code: data.product.code,
     productName: data.product.product_name ? data.product.product_name : data.product.product_name_en,
     genericName: data.product.generic_name ? data.product.generic_name : data.product.generic_name_en,
@@ -97,7 +94,7 @@ export const handleBarcodeLookup = async (barcode: string) => {
 };
 
 
-export const createItem = (itemInfo: ItemInfo) => {
+export const createItem = (itemInfo: Item) => {
   const itemId = randomUUID();
   const sql = `
     INSERT INTO item (id, barcode, product_name, generic_name_id, brand, unit_size, unit_type, image_url)

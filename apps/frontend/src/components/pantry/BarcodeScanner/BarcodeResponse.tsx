@@ -1,8 +1,8 @@
 import { fetchItem } from "@/apis/barcodeService";
-import { type ItemInfo } from "../../../../../shared/types"
+import { type Item } from "../../../../../shared/types"
 import { useState, useEffect } from "react"
 
-export function RenderBarcodeResult({ lastResult, setLastResult }: { lastResult: ItemInfo | null, setLastResult: React.Dispatch<React.SetStateAction<ItemInfo | null>> }) {
+export function RenderBarcodeResult({ lastResult, setLastResult }: { lastResult: Item | null, setLastResult: React.Dispatch<React.SetStateAction<Item | null>> }) {
   const handleTextChange = (e) => {
     const { name, value } = e.target;
     setLastResult(prev => ({
@@ -34,9 +34,8 @@ export function RenderBarcodeResult({ lastResult, setLastResult }: { lastResult:
           <input value={lastResult.genericName} name="genericName" onChange={(e) => handleTextChange(e)}></input>
         </label>
         <label>Barcode:
-          <input value={lastResult.code} name="code" onChange={handleTextChange}></input>
+          <input value={lastResult.barcode} name="code" onChange={handleTextChange}></input>
         </label>
-        <img src={lastResult.imageUrl || ''} />
         <label>Allergens:
           <input value={lastResult.allergens} name="allergens" />
         </label>
@@ -44,10 +43,10 @@ export function RenderBarcodeResult({ lastResult, setLastResult }: { lastResult:
           <input value={lastResult.productName} name="productName" onChange={handleTextChange} />
         </label>
         <label>Quantity:
-          <input value={lastResult.quantity} name="quantity" onChange={handleTextChange} />
+          <input value={lastResult.unitSize} name="quantity" onChange={handleTextChange} />
         </label>
         <label>Unit:
-          <input value={lastResult.unit} name="unit" onChange={handleTextChange} />
+          <input value={lastResult.unitType} name="unit" onChange={handleTextChange} />
         </label>
         <button className="bg-white">Submit</button>
       </form>
@@ -55,7 +54,7 @@ export function RenderBarcodeResult({ lastResult, setLastResult }: { lastResult:
   } else {
     return <></>
   }
-  // return <div>{Object.entries(lastResult as ItemInfo).map((item) => {
+  // return <div>{Object.entries(lastResult as Item).map((item) => {
   //   return <p>{item}</p>
   // })}</div>
 }

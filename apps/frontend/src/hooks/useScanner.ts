@@ -1,18 +1,18 @@
 import { useEffect, useState, useRef } from 'react';
 import { type Socket } from 'socket.io-client';
-import { type ItemInfo } from '../../../shared/types';
+import { type Item } from '../../../shared/types';
 import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode';
 
 export function useScanner(socket: Socket) {
   const [isScanning, setIsScanning] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [lastResult, setLastResult] = useState<ItemInfo | null>(null)
+  const [lastResult, setLastResult] = useState<Item | null>(null)
   const [isScannerVisible, setIsScannerVisible] = useState<boolean>(false)
   const scannerRef = useRef<Html5Qrcode | null>(null);
 
 
   useEffect(() => {
-    socket.on('barcode_stream', (content: ItemInfo) => {
+    socket.on('barcode_stream', (content: Item) => {
       barcodeResponseHandler(content, setLastResult)
       console.log(content)
       setIsLoading(false)
@@ -124,15 +124,14 @@ export function useScanner(socket: Socket) {
   return { isScanning, setIsScanning, lastResult, setLastResult, isLoading, isScannerVisible, setIsScannerVisible };
 }
 
-function barcodeResponseHandler(item: ItemInfo, setItem: React.Dispatch<React.SetStateAction<ItemInfo | null>>) {
-  const newItem: ItemInfo = {
-    code: '',
+function barcodeResponseHandler(item: Item, setItem: React.Dispatch<React.SetStateAction<Item | null>>) {
+  const newItem: Item = {
+    barcode: '',
     allergens: [],
     genericName: '',
-    imageUrl: '',
     productName: '',
-    quantity: '',
-    unit: ''
+    unitSize: 0,
+    unitType: ''
   }
   for (const [key, value] of Object.entries(item)) {
     if (value) {

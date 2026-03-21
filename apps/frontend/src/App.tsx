@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from 'react'
 import type { ChatMessage, ServerToClientEvents, ClientToServerEvents, BarcodeResponse } from './types';
 import { marked } from 'marked';
 import 'github-markdown-css/github-markdown-dark.css';
-import type { ItemInfo } from '../../shared/types.ts';
 import { socket } from './lib/socket.ts';
 import { useScanner } from './hooks/useScanner.ts';
 import { BarcodeScanner } from './components/pantry/BarcodeScanner/BarcodeScanner.tsx';

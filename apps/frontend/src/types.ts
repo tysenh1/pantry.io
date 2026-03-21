@@ -1,4 +1,4 @@
-import type { ItemInfo } from "../../shared/types";
+import type { Item } from "../../shared/types";
 
 export interface ChatMessage {
   role: 'user' | 'ai';
@@ -10,7 +10,7 @@ export interface ServerToClientEvents {
   agent_status: (status: string) => void;
   stream_done: () => void;
   error: (msg: string) => void;
-  barcode_stream: (content: ItemInfo) => void;
+  barcode_stream: (content: Item) => void;
 }
 
 export interface ClientToServerEvents {

@@ -1,11 +1,49 @@
 import { ProductV2 } from "@openfoodfacts/openfoodfacts-nodejs";
 
-export interface PantryItem {
-  item_name: string;
-  quantity: number;
-  unit: string;
-  is_staple?: boolean;
+// DATABASE TYPES
+
+export interface GenericName {
+  id: string;
+  name: string;
+  primary_unit: string;
+  weight_per_piece: number;
 }
+
+export interface Pantry {
+  id: string;
+  generic_name_id: string;
+  quantity: number;
+  is_staple: number;
+}
+
+export interface Recipes {
+  id: string;
+  name: string;
+  instructions: string;
+  ingredients: string;
+  tags: string;
+}
+
+export interface RecipeIngredients {
+  id: string;
+  ingredient_id: string;
+  quantity_needed: number;
+  unit: string;
+}
+
+// Item is used for both apps so it's in shared/types
+
+export interface Allergens {
+  id: string;
+  name: string;
+}
+
+export interface ItemAllergens {
+  item_id: string;
+  allergen_id: string;
+}
+
+
 
 export interface RecipeBase {
   id: string;
