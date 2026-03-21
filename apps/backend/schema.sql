@@ -1,7 +1,8 @@
 CREATE TABLE IF NOT EXISTS generic_name(
     id TEXT PRIMARY KEY,
     name TEXT UNIQUE NOT NULL,
-    base_unit TEXT NOT NULL
+    primary_unit TEXT NOT NULL,
+    weight_per_piece REAL NOT NULL
 );
 CREATE TABLE IF NOT EXISTS pantry(
     id TEXT PRIMARY KEY,
