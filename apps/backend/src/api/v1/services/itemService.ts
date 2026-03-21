@@ -1,10 +1,10 @@
-import type { GenericNameInfo, ItemInfo } from '../../../../../shared/types.ts';
+import type { BarcodeLookupResponse, GenericNameInfo, ItemInfo } from '../../../../../shared/types.ts';
 import type { Item } from '../types.ts';
 import { db } from '../config/db.ts';
 import type { OFFResponse } from '../types.ts';
 import { randomUUID } from 'crypto';
 import { type ProductV2 } from '@openfoodfacts/openfoodfacts-nodejs'
-import { parseUnit, parseQuantity, findGenericMatch, updateQuantity } from '../utils/itemUtils.ts';
+import { parseUnit, parseQuantity, findGenericMatch, incrementQuantity } from '../utils/itemUtils.ts';
 import { ExternalLookupError } from '../errors/errors.ts';
 import { ERROR_CODE } from '../../../constants/errorConstants.ts';
 
@@ -16,7 +16,7 @@ function parseListFromString(stringToParse: string): string[] {
   return stringToParse.split(',')
 }
 
-export const handleBarcodeLookup = async (barcode: string) => {
+export const handleBarcodeLookup = async (barcode: string): Promise<BarcodeLookupResponse> => {
 
   console.log(barcode)
   const localItem: Item = await db.prepare(`
@@ -24,8 +24,20 @@ export const handleBarcodeLookup = async (barcode: string) => {
   `).get(barcode);
 
   if (localItem) {
-    // return localItem
-    return updateQuantity(localItem)
+    const newItemQuantity = await incrementQuantity(localItem)
+
+    const itemInfo: ItemInfo = {
+      barcode: barcode,
+      productName: localItem.product_name,
+      genericName: { id: '', name: '' },
+      unitSize: newItemQuantity,
+      unitType: localItem.unit_type
+    }
+
+    return {
+      doesItemExist: true,
+      item: itemInfo
+    }
   }
 
   const response = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
@@ -35,18 +47,6 @@ export const handleBarcodeLookup = async (barcode: string) => {
     throw new ExternalLookupError(barcode, ERROR_CODE.EXTERNAL_LOOKUP_FAILED_CODE)
   }
 
-  // const convertedUnit = parseUnit(data.product)
-  // const quantity = parseQuantity(data.product)
-
-  //Need to upsert here (like the stuff done in the comments below)
-
-
-
-  // const item = db
-  // const name = data.product.product_name || "Unknown Item";
-  // Upsert into SQLite here
-  // return name;
-
   const genericNameMatches = findGenericMatch(data.product.product_name, data.product.categories)
 
   const genericNames = genericNameMatches
@@ -54,19 +54,19 @@ export const handleBarcodeLookup = async (barcode: string) => {
     .sort((a, b) => a.score - b.score)
     .slice(0, 5)
 
-  const productInfo: ItemInfo = {
+  const itemInfo: ItemInfo = {
     barcode: data.product.code,
     productName: data.product.product_name ? data.product.product_name as string : '',
     genericName: genericNames.map(name => name.item),
     unitSize: parseQuantity(data.product),
     unitType: parseUnit(data.product)
   }
-  return productInfo
+
+  return {
+    doesItemExist: false,
+    item: itemInfo
+  }
 };
-
-const updateItem = (item: ItemInfo) => {
-
-}
 
 
 export const createItem = (itemInfo: Item) => {

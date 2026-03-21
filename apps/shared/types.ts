@@ -10,3 +10,9 @@ export interface GenericNameInfo {
   id: string;
   name: string;
 }
+
+export interface BarcodeLookupResponse {
+  doesItemExist: boolean;
+  isItemUpdated?: boolean;
+  item: ItemInfo
+}
