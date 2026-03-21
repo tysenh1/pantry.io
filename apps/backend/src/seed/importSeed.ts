@@ -23,14 +23,14 @@ const runImport = db.transaction(() => {
 
   db.exec(schemaSql);
 
-  const genericNameStmt = db.prepare("INSERT INTO generic_name (id, generic_name) VALUES (?, ?)");
+  const genericNameStmt = db.prepare("INSERT INTO generic_name (id, name, primary_unit, weight_per_piece) VALUES (?, ?, ?, ?)");
   for (const name of seedGenericNames) {
-    genericNameStmt.run(name.id, name.name);
+    genericNameStmt.run(name.id, name.name, name.primary_unit, name.weight_per_piece);
   }
 
-  const pantryStmt = db.prepare("INSERT INTO pantry (id, item_name, quantity, unit, is_staple, generic_name_id) VALUES (?, ?, ?, ?, ?, ?)");
+  const pantryStmt = db.prepare("INSERT INTO pantry (id, generic_name_id, quantity, is_staple) VALUES (?, ?, ?, ?)");
   for (const item of seedPantry) {
-    pantryStmt.run(item.id, item.item_name, item.quantity, item.unit, item.is_staple, item.generic_name_id);
+    pantryStmt.run(item.id, item.generic_name_id, item.quantity, item.is_staple);
   }
 
   const recipeStmt = db.prepare("INSERT INTO recipes (id, name, instructions, ingredients, tags) VALUES (?, ?, ?, ?, ?)");
@@ -43,8 +43,8 @@ const runImport = db.transaction(() => {
     ingredientStmt.run(ing.recipe_id, ing.ingredient_id, ing.quantity_needed, ing.unit);
   }
 
-  db.prepare("INSERT INTO item (id, barcode, product_name, generic_name_id, brand, unit_size, unit_type, image_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
-    .run("THISISAUUID", "0068437389693", "Açai & blueberry flavours", genericNameIds.chocolate, "Brookside", 850, "g", "");
+  db.prepare("INSERT INTO item (id, barcode, product_name, generic_name_id, unit_size, unit_type) VALUES (?, ?, ?, ?, ?, ?)")
+    .run("THISISAUUID", "0068437389693", "Açai & blueberry flavours", genericNameIds.chocolate, 850, "g");
 
 
   console.log("✅ Database seeded successfully!");

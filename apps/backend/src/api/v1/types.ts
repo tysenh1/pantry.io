@@ -31,7 +31,14 @@ export interface RecipeIngredients {
   unit: string;
 }
 
-// Item is used for both apps so it's in shared/types
+export interface Item {
+  id: string;
+  barcode: string;
+  product_name: string;
+  generic_name_id: string;
+  unit_size: number;
+  unit_type: string;
+}
 
 export interface Allergens {
   id: string;

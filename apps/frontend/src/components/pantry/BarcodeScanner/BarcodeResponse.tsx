@@ -1,8 +1,8 @@
 import { fetchItem } from "@/apis/barcodeService";
-import { type Item } from "../../../../../shared/types"
+import { type ItemInfo } from "../../../../../shared/types"
 import { useState, useEffect } from "react"
 
-export function RenderBarcodeResult({ lastResult, setLastResult }: { lastResult: Item | null, setLastResult: React.Dispatch<React.SetStateAction<Item | null>> }) {
+export function RenderBarcodeResult({ lastResult, setLastResult }: { lastResult: ItemInfo | null, setLastResult: React.Dispatch<React.SetStateAction<ItemInfo | null>> }) {
   const handleTextChange = (e) => {
     const { name, value } = e.target;
     setLastResult(prev => ({
@@ -31,14 +31,20 @@ export function RenderBarcodeResult({ lastResult, setLastResult }: { lastResult:
     return (
       <form className="[&>label>input]:border [&>label>input]:border-white" onSubmit={handleSubmit}>
         <label>Generic Name:
-          <input value={lastResult.genericName} name="genericName" onChange={(e) => handleTextChange(e)}></input>
+          <select>
+            {Array.isArray(lastResult.genericName) &&
+              lastResult.genericName.map(name => (
+                <option key={name.id} value={name.id}>
+                  {name.name}
+                </option>
+              ))
+            }
+          </select>
         </label>
         <label>Barcode:
           <input value={lastResult.barcode} name="code" onChange={handleTextChange}></input>
         </label>
-        <label>Allergens:
-          <input value={lastResult.allergens} name="allergens" />
-        </label>
+
         <label>Product Name:
           <input value={lastResult.productName} name="productName" onChange={handleTextChange} />
         </label>

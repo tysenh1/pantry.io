@@ -1,9 +1,10 @@
-import type { Item } from '../../../../../shared/types.ts';
+import type { GenericNameInfo, ItemInfo } from '../../../../../shared/types.ts';
+import type { Item } from '../types.ts';
 import { db } from '../config/db.ts';
 import type { OFFResponse } from '../types.ts';
 import { randomUUID } from 'crypto';
 import { type ProductV2 } from '@openfoodfacts/openfoodfacts-nodejs'
-import { parseUnit, parseQuantity } from '../utils/itemUtils.ts';
+import { parseUnit, parseQuantity, findGenericMatch } from '../utils/itemUtils.ts';
 import { ExternalLookupError } from '../errors/errors.ts';
 import { ERROR_CODE } from '../../../constants/errorConstants.ts';
 
@@ -35,33 +36,12 @@ export const handleBarcodeLookup = async (barcode: string) => {
     SELECT * FROM item WHERE barcode = ?
   `).get(barcode);
 
-  return localItem
-
   if (localItem) {
-    return localItem
+    // return localItem
   }
-  // const localItem: any = await db.prepare(`
-  //     SELECT
-  //       i.barcode,
-  //       i.product_name,
-  //       g.generic_name,
-  //       i.brand,
-  //       i.unit_size,
-  //       i.unit_type,
-  //       i.image_url
-  //     FROM item i
-  //     JOIN generic_name g ON i.generic_name_id = g.id
-  //     WHERE i.barcode = ?
-  //   `).get(barcode);
-  //
-  // if (localItem) {
-  //   return localItem;
-  // }
 
   const response = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
   const data: OFFResponse = await response.json();
-
-  return data
 
   if (data.status == 0) {
     throw new ExternalLookupError(barcode, ERROR_CODE.EXTERNAL_LOOKUP_FAILED_CODE)
@@ -79,19 +59,26 @@ export const handleBarcodeLookup = async (barcode: string) => {
   // Upsert into SQLite here
   // return name;
 
+  const genericNameMatches = findGenericMatch(data.product.product_name, data.product.categories)
 
-  const productInfo: Item = {
-    code: data.product.code,
-    productName: data.product.product_name ? data.product.product_name : data.product.product_name_en,
-    genericName: data.product.generic_name ? data.product.generic_name : data.product.generic_name_en,
-    brand: data.product.brands ? data.product.brands?.split(',')[0] : '',
-    allergens: data?.product.allergens ? data.product.allergens_tags : parseListFromString(data?.product.allergens || ''),
-    imageUrl: data.product.image_small_url ? data.product.image_small_url : data.product.image_url,
-    quantity: data.product.quantity ? data.product.quantity : '',
-    unit: parseUnit(data.product)
+  const genericNames = genericNameMatches
+    // @ts-ignore
+    .sort((a, b) => a.score - b.score)
+    .slice(0, 5)
+
+  const productInfo: ItemInfo = {
+    barcode: data.product.code,
+    productName: data.product.product_name ? data.product.product_name as string : '',
+    genericName: genericNames.map(name => name.item),
+    unitSize: data.product.quantity ? parseInt(data.product.quantity) : 0,
+    unitType: parseUnit(data.product)
   }
   return productInfo
 };
+
+const updateItem = (item: ItemInfo) => {
+
+}
 
 
 export const createItem = (itemInfo: Item) => {

@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS recipe_ingredients(
     ingredient_id TEXT,
     quantity_needed REAL,
     unit TEXT,
-    FOREIGN KEY(ingredient_id) REFERENCES pantry(id) ON DELETE CASCADE
+    FOREIGN KEY(ingredient_id) REFERENCES pantry(id) ON DELETE CASCADE,
     FOREIGN KEY(id) REFERENCES recipes(id) ON DELETE CASCADE
 );
 CREATE TABLE IF NOT EXISTS item(
@@ -42,7 +42,8 @@ CREATE TABLE IF NOT EXISTS allergens(
 );
 CREATE TABLE IF NOT EXISTS item_allergens(
     item_id TEXT NOT NULL,
-    allergen_id TEXT NOT NULL PRIMARY KEY(item_id, allergen_id),
-    FOREIGN KEY(item_id) REFERENCES item(id) ON DELETE CASCADE
+    allergen_id TEXT NOT NULL,
+    PRIMARY KEY(item_id, allergen_id),
+    FOREIGN KEY(item_id) REFERENCES item(id) ON DELETE CASCADE,
     FOREIGN KEY(allergen_id) REFERENCES allergens(id) ON DELETE CASCADE
 );

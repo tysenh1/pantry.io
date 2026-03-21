@@ -5,6 +5,8 @@ Fetch multiple food facts databases if there is missing information for one of t
 
 Add the docker script for the local llms if the user wants to set the application up with an llm
 
+PLEASE FIX THE CODE IN THE FINDGENERICMATCH FUNCTION IT IS VERY BAD BUT I DONT KNOW HOW TO DO IT BETTER RIGHT NOW
+
 Maybe make a status symbol with health checks for all the components on the frontend?
     Like a status for the api, llm chatbot, OFF database, things like that. 
 

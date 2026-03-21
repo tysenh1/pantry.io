@@ -1,4 +1,7 @@
 import { type ProductV2 } from "@openfoodfacts/openfoodfacts-nodejs"
+import { db } from "../config/db";
+import Fuse, { FuseResult } from 'fuse.js'
+import { GenericNameInfo } from "../../../../../shared/types";
 
 const UNIT_REGEX = /^([0-9.]+)\s*([a-zA-Z]+)/;
 
@@ -37,4 +40,42 @@ export function parseQuantity(product: ProductV2): number {
   }
 
   return finalQuantity;
+}
+
+export const findGenericMatch = (productName: string = '', categoriesString: string = ''): FuseResult<GenericNameInfo>[] => {
+  const categories = categoriesString.split(',')
+  const genericBuckets = db.prepare('SELECT id, name FROM generic_name').all();
+
+  const fuseOptions = {
+    keys: ['name'],
+    threshold: 0.4,
+    includeScore: true,
+    ignoreFieldNorm: true
+  }
+
+  const fuse = new Fuse(genericBuckets, fuseOptions)
+
+  const searchResults: FuseResult<GenericNameInfo>[] = []
+
+  if (categories.length > 0) {
+    for (const cat of categories) {
+      const results: FuseResult<GenericNameInfo>[] = fuse.search(cat)
+
+      for (const result of results) {
+        searchResults.push(result)
+      }
+      console.log(results)
+    }
+  }
+
+  const cleanedName = productName
+    .replace(/\d+(\.\d+)?\s*(oz|g|ml|kg|lb|oz|pcs)/gi, '') // Strip units
+    .trim();
+
+  const results: FuseResult<GenericNameInfo>[] = fuse.search(cleanedName);
+  for (const result of results) {
+    searchResults.push(result)
+  }
+
+  return searchResults;
 }

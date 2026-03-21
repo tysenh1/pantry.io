@@ -1,6 +1,6 @@
-import { type Item } from "../../../shared/types";
+import { type ItemInfo } from "../../../shared/types";
 
-export async function fetchItem(lastResult: Item) {
+export async function fetchItem(lastResult: ItemInfo) {
   const response = await fetch(`https://${import.meta.env.VITE_IP_ADDR}/api/v1/items`, {
     method: 'POST',
     headers: {

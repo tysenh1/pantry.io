@@ -1,9 +1,12 @@
-export interface Item {
-  id?: string;
+export interface ItemInfo {
   barcode: string;
   productName: string;
-  genericName: string;
+  genericName: GenericNameInfo | GenericNameInfo[];
   unitSize: number;
-  unitType: string
-  allergens?: string[];
+  unitType: string;
+}
+
+export interface GenericNameInfo {
+  id: string;
+  name: string;
 }
