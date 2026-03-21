@@ -38,6 +38,21 @@ export const handleBarcodeLookup = async (barcode: string) => {
 
   if (localItem) {
     // return localItem
+    const quantityUpdateInfo = await db.prepare(`
+SELECT p.quantity, i.unit_size, i.unit_type, g.name, g.primary_unit, g.weight_per_piece, g.id FROM item i JOIN pantry p ON p.generic_name_id = i.generic_name_id JOIN generic_name g ON i.generic_name_id = g.id WHERE i.barcode = ?
+`).get(barcode)
+    const newQuantity = quantityUpdateInfo.quantity + quantityUpdateInfo.unit_size
+    console.log(quantityUpdateInfo)
+    console.log(quantityUpdateInfo.quantity, quantityUpdateInfo.unit_size, newQuantity)
+
+    await db.prepare(`
+UPDATE pantry SET quantity = ? WHERE generic_name_id = ?
+`).run(newQuantity, quantityUpdateInfo.id)
+
+    const updatedItem = await db.prepare(`
+SELECT * FROM pantry WHERE generic_name_id = ?;
+`).get(quantityUpdateInfo.id)
+    return updatedItem
   }
 
   const response = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
@@ -70,7 +85,7 @@ export const handleBarcodeLookup = async (barcode: string) => {
     barcode: data.product.code,
     productName: data.product.product_name ? data.product.product_name as string : '',
     genericName: genericNames.map(name => name.item),
-    unitSize: data.product.quantity ? parseInt(data.product.quantity) : 0,
+    unitSize: parseQuantity(data.product),
     unitType: parseUnit(data.product)
   }
   return productInfo
@@ -87,9 +102,6 @@ export const createItem = (itemInfo: Item) => {
     INSERT INTO item (id, barcode, product_name, generic_name_id, brand, unit_size, unit_type, image_url)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?);
   `
-
-  const convertedUnit = parseUnit(itemInfo.unit as string)
-  const quantity = parseQuantity
 
   const params = [
     itemId,
