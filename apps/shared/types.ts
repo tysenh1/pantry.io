@@ -1,7 +1,7 @@
 export interface ItemInfo {
   barcode: string;
   productName: string;
-  genericName: GenericNameInfo[];
+  genericName: GenericNameInfo;
   unitSize: number;
   unitType: string;
 }
@@ -13,5 +13,6 @@ export interface GenericNameInfo {
 
 export interface BarcodeLookupResponse {
   doesItemExist: boolean;
-  item: ItemInfo
+  item: Omit<ItemInfo, 'genericName'>;
+  genericNames: GenericNameInfo[]
 }

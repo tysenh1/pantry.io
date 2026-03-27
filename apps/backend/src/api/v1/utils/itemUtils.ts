@@ -1,8 +1,8 @@
 import { type ProductV2 } from "@openfoodfacts/openfoodfacts-nodejs"
 import { db } from "../config/db";
 import Fuse, { FuseResult } from 'fuse.js'
-import { GenericNameInfo } from "../../../../../shared/types";
-import { Item, QuantityUpdateInfo } from "../types";
+import { GenericNameInfo, ItemInfo } from "../../../../../shared/types";
+import { QuantityUpdateInfo } from "../types";
 
 const UNIT_REGEX = /^([0-9.]+)\s*([a-zA-Z]+)/;
 
@@ -49,7 +49,7 @@ export const findGenericMatch = (productName: string = '', categoriesString: str
 
   const fuseOptions = {
     keys: ['name'],
-    threshold: 0.4,
+    threshold: 0.8,
     includeScore: true,
     ignoreFieldNorm: true
   }
@@ -65,7 +65,6 @@ export const findGenericMatch = (productName: string = '', categoriesString: str
       for (const result of results) {
         searchResults.push(result)
       }
-      console.log(results)
     }
   }
 
@@ -75,35 +74,35 @@ export const findGenericMatch = (productName: string = '', categoriesString: str
 
   const results: FuseResult<GenericNameInfo>[] = fuse.search(cleanedName);
   for (const result of results) {
+    console.log(result)
     searchResults.push(result)
   }
 
   return searchResults;
 }
 
-export const incrementQuantity = async (item: Item): Promise<Item> => {
+export const incrementQuantity = async (item: ItemInfo): Promise<ItemInfo> => {
   const quantityUpdateInfo: QuantityUpdateInfo = await db.prepare(`
 SELECT p.quantity, g.primary_unit, g.weight_per_piece FROM generic_name g JOIN pantry p ON p.generic_name_id = g.id WHERE g.id = ?
-`).get(item.generic_name_id)
-  const newQuantity = getNewQuantity(quantityUpdateInfo, item.unit_size, item.unit_type)
+`).get(item.genericName.id)
+  const newQuantity = getNewQuantity(quantityUpdateInfo, item.unitSize, item.unitType)
 
   await db.prepare(`
   UPDATE pantry SET quantity = ? WHERE generic_name_id = ?
-  `).run(newQuantity, item.generic_name_id)
+  `).run(newQuantity, item.genericName.id)
 
-  const newQuantityWithOldUnit = normalizeQuantity(newQuantity, item.unit_type)
+  const newQuantityWithOldUnit = normalizeQuantity(newQuantity, item.unitType)
 
   return {
-    id: item.id,
     barcode: item.barcode,
-    product_name: item.product_name,
-    generic_name_id: item.generic_name_id,
-    unit_size: newQuantityWithOldUnit,
-    unit_type: item.unit_type
+    productName: item.productName,
+    genericName: item.genericName,
+    unitSize: newQuantityWithOldUnit,
+    unitType: item.unitType
   }
 }
 
-const getNewQuantity = (info: QuantityUpdateInfo, unitSize: number, unitType: string) => {
+export const getNewQuantity = (info: QuantityUpdateInfo, unitSize: number, unitType: string) => {
 
   if (info.primary_unit == unitType) {
     return info.quantity + unitSize
