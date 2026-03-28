@@ -64,6 +64,7 @@ export const handleBarcodeLookup = async (barcode: string): Promise<BarcodeLooku
     // @ts-ignore
     .sort((a, b) => a.score - b.score)
     .slice(0, 5)
+    .map(result => { return result.item })
 
   const itemInfo: Omit<ItemInfo, 'genericName'> = {
     barcode: data.product.code,
@@ -75,7 +76,8 @@ export const handleBarcodeLookup = async (barcode: string): Promise<BarcodeLooku
   return {
     doesItemExist: false,
     item: itemInfo,
-    genericNames: genericNames.map(name => name.item)
+    // could just drop genericNames here, honestly not sure and have bigger fish to fry right now
+    genericNames: [...genericNames]
   }
 };
 

@@ -55,8 +55,8 @@ function App() {
       {/* Header */}
       <div className="border-b border-green-800 pb-2 mb-4 flex justify-between items-center">
         <h1 className="text-xl tracking-widest">KITCHEN_OS</h1>
-        {/* <button onClick={() => { setIsScannerVisible(true); setIsScanning(true); }} className='bg-white cursor-pointer'>Start barcode scanner</button> */}
-        <button onClick={() => { setIsScannerVisible(true); setIsScanning(true); socket.emit('barcode', '0068437389693'); }} className='bg-white cursor-pointer'>Start barcode scanner</button>
+        <button onClick={() => { setIsScannerVisible(true); setIsScanning(true); }} className='bg-white cursor-pointer'>Start barcode scanner</button>
+        {/* <button onClick={() => { setIsScannerVisible(true); setIsScanning(true); socket.emit('barcode', '0068437389693'); }} className='bg-white cursor-pointer'>Start barcode scanner</button> */}
       </div>
 
       <BarcodeScanner lastResult={lastResult} setLastResult={setLastResult} isScannerVisible={isScannerVisible} isLoading={isLoading} setIsScannerVisible={setIsScannerVisible} setIsScanning={setIsScanning} />
