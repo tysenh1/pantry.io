@@ -49,7 +49,7 @@ export const findGenericMatch = (productName: string = '', categoriesString: str
 
   const fuseOptions = {
     keys: ['name'],
-    threshold: 0.8,
+    threshold: 0.4,
     includeScore: true,
     ignoreFieldNorm: true
   }
@@ -71,11 +71,14 @@ export const findGenericMatch = (productName: string = '', categoriesString: str
   const cleanedName = productName
     .replace(/\d+(\.\d+)?\s*(oz|g|ml|kg|lb|oz|pcs)/gi, '') // Strip units
     .trim();
+  const splitName = cleanedName.split(' ')
 
-  const results: FuseResult<GenericNameInfo>[] = fuse.search(cleanedName);
-  for (const result of results) {
-    console.log(result)
-    searchResults.push(result)
+  for (const word of splitName) {
+    const results: FuseResult<GenericNameInfo>[] = fuse.search(word)
+
+    for (const result of results) {
+      searchResults.push(result)
+    }
   }
 
   return searchResults;
