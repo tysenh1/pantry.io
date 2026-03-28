@@ -1,6 +1,12 @@
+YOU GOTTA FIND OUT HOW TO ADD PANTRY ITEMS BRO WHERE DO THOSE COME IN TO PLAY.
+EVERYTHING ELSE WITH THE ITEM STUFF SHOULD BE GOOD TO GO BUT YOU GOTTA FIGURE OUT THE FLOW OF PANTRY N STUFF
+
 Fetch multiple food facts databases if there is missing information for one of them so the user just has to review instead of always adding details for missing fields.
 
 Add the docker script for the local llms if the user wants to set the application up with an llm
+
+PLEASE FIX THE CODE IN THE FINDGENERICMATCH FUNCTION IT IS VERY BAD BUT I DONT KNOW HOW TO DO IT BETTER RIGHT NOW
+Also fix the code that handles the return from incrementQuantity in handleBarcodeLookup, has to be a better way to do it then that
 
 Maybe make a status symbol with health checks for all the components on the frontend?
     Like a status for the api, llm chatbot, OFF database, things like that. 

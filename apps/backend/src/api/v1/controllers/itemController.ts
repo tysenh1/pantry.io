@@ -16,6 +16,7 @@ export const createItem = async (
   res: Response,
   next: NextFunction
 ): Promise<void> => {
+  console.log("THIS IS RUNINNG")
   try {
     const newItem = await itemService.createItem(req.body);
 
@@ -25,6 +26,19 @@ export const createItem = async (
   }
 }
 
+export const barcodeTest = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const barcodeResult = await itemService.handleBarcodeLookup(req.body.code)
+
+    res.status(200).json(barcodeResult)
+  } catch (err) {
+    next(err)
+  }
+}
 
 export const updateItem = async (
   req: Request,

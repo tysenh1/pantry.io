@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from 'react'
 import type { ChatMessage, ServerToClientEvents, ClientToServerEvents, BarcodeResponse } from './types';
 import { marked } from 'marked';
 import 'github-markdown-css/github-markdown-dark.css';
-import type { ItemInfo } from '../../shared/types.ts';
 import { socket } from './lib/socket.ts';
 import { useScanner } from './hooks/useScanner.ts';
 import { BarcodeScanner } from './components/pantry/BarcodeScanner/BarcodeScanner.tsx';
@@ -50,12 +49,14 @@ function App() {
 
   useEffect(() => chatEnd.current?.scrollIntoView({ behavior: "smooth" }), [messages])
 
+
   return (
     <div className="h-screen bg-black text-green-500 font-mono p-4 flex flex-col">
       {/* Header */}
       <div className="border-b border-green-800 pb-2 mb-4 flex justify-between items-center">
         <h1 className="text-xl tracking-widest">KITCHEN_OS</h1>
-        <button onClick={() => { setIsScannerVisible(true); setIsScanning(true); }} className='bg-white cursor-pointer'>Start barcode scanner</button>
+        {/* <button onClick={() => { setIsScannerVisible(true); setIsScanning(true); }} className='bg-white cursor-pointer'>Start barcode scanner</button> */}
+        <button onClick={() => { setIsScannerVisible(true); setIsScanning(true); socket.emit('barcode', '0068437389693'); }} className='bg-white cursor-pointer'>Start barcode scanner</button>
       </div>
 
       <BarcodeScanner lastResult={lastResult} setLastResult={setLastResult} isScannerVisible={isScannerVisible} isLoading={isLoading} setIsScannerVisible={setIsScannerVisible} setIsScanning={setIsScanning} />

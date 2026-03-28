@@ -1,10 +1,18 @@
 export interface ItemInfo {
-  code: string;
-  brand?: string;
-  allergens?: string[];
-  genericName?: string;
-  imageUrl?: string;
-  productName?: string;
-  quantity?: string;
-  unit?: string;
+  barcode: string;
+  productName: string;
+  genericName: GenericNameInfo;
+  unitSize: number;
+  unitType: string;
+}
+
+export interface GenericNameInfo {
+  id: string;
+  name: string;
+}
+
+export interface BarcodeLookupResponse {
+  doesItemExist: boolean;
+  item: Omit<ItemInfo, 'genericName'>;
+  genericNames: GenericNameInfo[]
 }

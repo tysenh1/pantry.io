@@ -1,9 +1,56 @@
-export interface PantryItem {
-  item_name: string;
-  quantity: number;
-  unit: string;
-  is_staple?: boolean;
+import { ProductV2 } from "@openfoodfacts/openfoodfacts-nodejs";
+
+// DATABASE TYPES
+
+export interface GenericName {
+  id: string;
+  name: string;
+  primary_unit: string;
+  weight_per_piece: number;
 }
+
+export interface Pantry {
+  id: string;
+  generic_name_id: string;
+  quantity: number;
+  is_staple: number;
+}
+
+export interface Recipes {
+  id: string;
+  name: string;
+  instructions: string;
+  ingredients: string;
+  tags: string;
+}
+
+export interface RecipeIngredients {
+  id: string;
+  ingredient_id: string;
+  quantity_needed: number;
+  unit: string;
+}
+
+export interface Item {
+  id: string;
+  barcode: string;
+  product_name: string;
+  generic_name_id: string;
+  unit_size: number;
+  unit_type: string;
+}
+
+export interface Allergens {
+  id: string;
+  name: string;
+}
+
+export interface ItemAllergens {
+  item_id: string;
+  allergen_id: string;
+}
+
+
 
 export interface RecipeBase {
   id: string;
@@ -34,7 +81,7 @@ export interface OFFResponse {
   code: string;
   status: number;
   status_verbose: string;
-  product: OFFProductResponse;
+  product: ProductV2;
 }
 
 export interface OFFProductResponse {
@@ -51,4 +98,12 @@ export interface OFFProductResponse {
   product_quantity_string?: string;
   product_quantity_unit: string;
   net_weight_unit?: string;
+}
+
+export interface QuantityUpdateInfo {
+  quantity: number;
+  name: string;
+  primary_unit: string;
+  weight_per_piece: number;
+  id: string;
 }

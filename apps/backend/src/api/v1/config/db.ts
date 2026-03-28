@@ -1,4 +1,4 @@
-import sqlite3 from 'sqlite3';
+import sqlite3 from 'better-sqlite3';
 
-export const db = new sqlite3.Database('./db.db');
+export const db = new sqlite3('./db.db');
 

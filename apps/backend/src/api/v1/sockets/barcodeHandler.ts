@@ -10,6 +10,7 @@ export const registerBarcodeHandlers = (socket: Socket) => {
 
       socket.emit('barcode_stream', productData)
 
+      // Implement custom error handling here
     } catch (err) {
       console.error('Barcode processing failed:', err)
       socket.emit('error', 'Could not identify that item.')

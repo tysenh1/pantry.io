@@ -1,10 +1,10 @@
 // import type { Socket } from "socket.io-client";
-import { type ItemInfo } from '../../../../../shared/types'
+import { type BarcodeLookupResponse } from '../../../../../shared/types'
 import { RenderBarcodeResult } from './BarcodeResponse.tsx'
 
 export function BarcodeScanner({ lastResult, setLastResult, isScannerVisible, isLoading, setIsScannerVisible, setIsScanning }: {
-  lastResult: ItemInfo | null,
-  setLastResult: React.Dispatch<React.SetStateAction<ItemInfo | null>>,
+  lastResult: BarcodeLookupResponse | null,
+  setLastResult: React.Dispatch<React.SetStateAction<BarcodeLookupResponse | null>>,
   isScannerVisible: boolean,
   isLoading: boolean
   setIsScannerVisible: React.Dispatch<React.SetStateAction<boolean>>,
@@ -23,20 +23,22 @@ export function BarcodeScanner({ lastResult, setLastResult, isScannerVisible, is
       </div>
       <h2>Scanning</h2>
       <div id='reader' className='rounded-bl-2xl rounded-br-2xl'></div>
-      {BarcodeResponse({ lastResult, setLastResult, isLoading })}
+      {lastResult && BarcodeResponse({ lastResult, setLastResult, isLoading, setIsScanning, setIsScannerVisible })}
     </div >
 
   )
 }
 
 
-export function BarcodeResponse({ lastResult, setLastResult, isLoading }: {
-  lastResult: ItemInfo | null,
-  setLastResult: React.Dispatch<React.SetStateAction<ItemInfo | null>>,
-  isLoading: boolean
+export function BarcodeResponse({ lastResult, setLastResult, isLoading, setIsScanning, setIsScannerVisible }: {
+  lastResult: BarcodeLookupResponse | null,
+  setLastResult: React.Dispatch<React.SetStateAction<BarcodeLookupResponse | null>>,
+  isLoading: boolean,
+  setIsScanning: React.Dispatch<React.SetStateAction<boolean>>,
+  setIsScannerVisible: React.Dispatch<React.SetStateAction<boolean>>
 }) {
   if (lastResult && !isLoading) {
-    return <RenderBarcodeResult lastResult={lastResult} setLastResult={setLastResult} />
+    return <RenderBarcodeResult lastResult={lastResult} setLastResult={setLastResult} setIsScanning={setIsScanning} setIsScannerVisible={setIsScannerVisible} />
   } else if (isLoading) {
     return <div>LOADINGGGGGGG</div>
   } else {

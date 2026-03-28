@@ -1,65 +1,59 @@
-import sqlite3 from 'sqlite3';
-import { seedPantry, seedRecipes, seedRecipeIngredients } from './seedData.ts';
+import sqlite3 from 'better-sqlite3';
+import { seedPantry, seedRecipes, seedRecipeIngredients, seedGenericNames, genericNameIds } from './seedData.ts';
 import path from 'path';
 import fs from 'fs';
 
-const db = new sqlite3.Database('./db.db');
+const db = sqlite3('/home/tysenh1/Coding/pantry.io/apps/backend/db.db');
 
-// ✅ FIXED: Import seedRecipeIngredients from your seedData.ts
-const schemaPath = '/home/tysenh1/Coding/kitchenio/apps/backend/';
+const schemaPath = '/home/tysenh1/Coding/pantry.io/apps/backend/';
 const schemaSql = fs.readFileSync(schemaPath + 'schema.sql', 'utf8');
 
-const runImport = () => {
-  db.serialize(() => {
-    console.log('🔄 Starting kitchen database seeding...');
+// db.pragma('foreign_keys = FALSE')
 
-    // 1. Drop and recreate tables
-    db.run('DROP TABLE IF EXISTS recipe_ingredients');
-    db.run('DROP TABLE IF EXISTS recipes');
-    db.run('DROP TABLE IF EXISTS pantry');
-    db.run('DROP TABLE IF EXISTS item')
-    db.run('DROP TABLE IF EXISTS allergens');
-    db.run('DROP TABLE IF EXISTS item_allergens');
+const runImport = db.transaction(() => {
+  console.log('🔄 Starting kitchen database seeding...');  // 1. Drop and recreate tables
 
-    // 2. ✅ FIXED: Execute schema FIRST (creates tables)
-    db.exec(schemaSql);
+  db.exec('DROP TABLE IF EXISTS item;');
+  db.exec('DROP TABLE IF EXISTS item_allergens;');
+  db.exec('DROP TABLE IF EXISTS pantry;');
+  db.exec('DROP TABLE IF EXISTS recipe_ingredients;');
+  db.exec('DROP TABLE IF EXISTS recipes;');
+  db.exec('DROP TABLE IF EXISTS allergens;');
+  db.exec('DROP TABLE IF EXISTS generic_name;');
 
-    // 3. Insert Pantry
-    const pantryStmt = db.prepare("INSERT INTO pantry (id, item_name, quantity, unit, is_staple) VALUES (?, ?, ?, ?, ?)");
-    seedPantry.forEach(item => {
-      pantryStmt.run(item.id, item.item_name, item.quantity, item.unit, item.is_staple);
-    });
-    pantryStmt.finalize();
+  db.exec(schemaSql);
 
-    // 4. Insert Recipes
-    const recipeStmt = db.prepare("INSERT INTO recipes (id, name, instructions, ingredients, tags) VALUES (?, ?, ?, ?, ?)");
-    seedRecipes.forEach(recipe => {
-      recipeStmt.run(recipe.id, recipe.name, recipe.instructions, recipe.ingredients, recipe.tags);
-    });
-    recipeStmt.finalize();
+  const genericNameStmt = db.prepare("INSERT INTO generic_name (id, name, primary_unit, weight_per_piece) VALUES (?, ?, ?, ?)");
+  for (const name of seedGenericNames) {
+    genericNameStmt.run(name.id, name.name, name.primary_unit, name.weight_per_piece);
+  }
 
-    // 5. ✅ FIXED: Use seedRecipeIngredients array directly
-    const ingredientStmt = db.prepare("INSERT INTO recipe_ingredients (recipe_id, ingredient_id, quantity_needed, unit) VALUES (?, ?, ?, ?)");
-    seedRecipeIngredients.forEach(ing => {
-      ingredientStmt.run(ing.recipe_id, ing.ingredient_id, ing.quantity_needed, ing.unit);
-    });
-    ingredientStmt.finalize();
+  const pantryStmt = db.prepare("INSERT INTO pantry (id, generic_name_id, quantity, is_staple) VALUES (?, ?, ?, ?)");
+  for (const item of seedPantry) {
+    pantryStmt.run(item.id, item.generic_name_id, item.quantity, item.is_staple);
+  }
 
-    console.log("✅ Database seeded successfully!");
-    console.log(`📦 Pantry items: ${seedPantry.length}`);
-    console.log(`🍳 Recipes: ${seedRecipes.length}`);
-    console.log(`🔗 Recipe ingredients: ${seedRecipeIngredients.length}`);
-  });
+  const recipeStmt = db.prepare("INSERT INTO recipes (id, name, instructions, ingredients, tags) VALUES (?, ?, ?, ?, ?)");
+  for (const recipe of seedRecipes) {
+    recipeStmt.run(recipe.id, recipe.name, recipe.instructions, recipe.ingredients, recipe.tags);
+  }
 
-  db.close((err) => {
-    if (err) {
-      console.error('❌ Error closing db:', err.message);
-    } else {
-      console.log('🔒 Database connection closed.');
-    }
-  });
+  const ingredientStmt = db.prepare("INSERT INTO recipe_ingredients (id, ingredient_id, quantity_needed, unit) VALUES (?, ?, ?, ?)");
+  for (const ing of seedRecipeIngredients) {
+    ingredientStmt.run(ing.recipe_id, ing.ingredient_id, ing.quantity_needed, ing.unit);
+  }
+
+  // db.prepare("INSERT INTO item (id, barcode, product_name, generic_name_id, unit_size, unit_type) VALUES (?, ?, ?, ?, ?, ?)")
+  // .run("THISISAUUID", "0068437389693", "Açai & blueberry flavours", genericNameIds.chocolate, 850, "g");
 
 
-};
+  console.log("✅ Database seeded successfully!");
+  console.log(`📦 Pantry items: ${seedPantry.length}`);
+  console.log(`🍳 Recipes: ${seedRecipes.length}`);
+  console.log(`🔗 Recipe ingredients: ${seedRecipeIngredients.length}`);
+
+});
 
 runImport();
+
+db.close();
