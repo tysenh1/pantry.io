@@ -8,23 +8,27 @@ export function RenderBarcodeResult({ lastResult, setLastResult, setIsScanning, 
   setIsScanning: React.Dispatch<React.SetStateAction<boolean>>,
   setIsScannerVisible: React.Dispatch<React.SetStateAction<boolean>>
 }) {
-  const [selectValue, setSelectValue] = useState(lastResult.item.genericName[0].id)
+  const [selectValue, setSelectValue] = useState(lastResult.genericNames[0].id)
+
+  useEffect(() => {
+    console.log("SELECT VALUE", selectValue)
+    console.log("LAST RESULT", lastResult)
+  }, [selectValue, lastResult])
 
   const genericNameInput = () => {
-    if (Array.isArray(lastResult.item.genericName) && lastResult.item.genericName.length > 1) {
+    if (lastResult.genericNames.length > 1) {
       return (
         <select onChange={handleSelectChange}>
-          {Array.isArray(lastResult.item.genericName) &&
-            lastResult.item.genericName.map(name => (
-              <option key={name.id} value={name.id}>
-                {name.name}
-              </option>
-            ))
+          {lastResult.genericNames.map(name => (
+            <option key={name.id} value={name.id}>
+              {name.name}
+            </option>
+          ))
           }
         </select>
       )
     } else {
-      const genericName = lastResult.item.genericName[0]
+      const genericName = lastResult.genericNames[0]
       return (
         // Disabling this for now until I find a way to query the backend for all generic names efficiently
         // Also assuming there is something in the array but I'll deal with that later
@@ -46,7 +50,8 @@ export function RenderBarcodeResult({ lastResult, setLastResult, setIsScanning, 
       item: {
         ...prev?.item,
         [name]: value
-      }
+      },
+      genericNames: prev?.genericNames
       // ...prev,
       // [name]: value
     }))
@@ -58,16 +63,19 @@ export function RenderBarcodeResult({ lastResult, setLastResult, setIsScanning, 
     try {
       if (lastResult) {
         // Technically this can be undefined but its sorting through the ids in the genericName array so I don't think it can actually be undefined
-        const genericName = lastResult.item.genericName.find(item => item.id == selectValue) as GenericNameInfo
+        const genericName = lastResult.genericNames.find(item => item.id == selectValue) as GenericNameInfo
         // @ts-expect-error Same reason as above
         setLastResult(prev => ({
           doesItemExist: prev?.doesItemExist,
           item: {
             ...prev?.item,
-            genericName: [genericName],
-          }
+          },
+          genericNames: [genericName]
         }))
-        fetchItem(lastResult.item)
+        fetchItem({
+          ...lastResult.item,
+          genericName: genericName
+        })
       }
     } catch (err) {
       alert(err)
@@ -88,9 +96,7 @@ export function RenderBarcodeResult({ lastResult, setLastResult, setIsScanning, 
     return (
       <form className="[&>label>input]:border [&>label>input]:border-white" onSubmit={handleSubmit}>
         <label>Generic Name:
-          <select onChange={handleSelectChange}>
-            {genericNameInput()}
-          </select>
+          {genericNameInput()}
         </label>
         <label>Barcode:
           <input value={lastResult.item.barcode} name="barcode" onChange={handleTextChange}></input>
@@ -110,11 +116,10 @@ export function RenderBarcodeResult({ lastResult, setLastResult, setIsScanning, 
     )
   } else if (lastResult && lastResult.doesItemExist === true) {
     setIsScanning(false)
-    const genericName = !Array.isArray(lastResult.item.genericName) ? lastResult.item.genericName.name : lastResult.item.genericName[0].name
     return (
       <div className="absolute w-[400px] h-[400px] top-1/2 left-1/2 border-white border-2 bg-black">
 
-        <p>You now have {lastResult.item.unitSize} {lastResult.item.unitType} of {genericName} in your pantry!</p>
+        <p>You now have {lastResult.item.unitSize} {lastResult.item.unitType} of {lastResult.genericNames[0].name} in your pantry!</p>
         <button onClick={() => { setLastResult(null); setIsScannerVisible(false) }} className="cursor-pointer border border-white">Sounds Good</button>
       </div >
     )

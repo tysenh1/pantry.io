@@ -1,6 +1,6 @@
-// import type { Socket } from "socket.io-client";
 import { type BarcodeLookupResponse } from '../../../../../shared/types'
 import { RenderBarcodeResult } from './BarcodeResponse.tsx'
+import { socket } from '../../../lib/socket.ts'
 
 export function BarcodeScanner({ lastResult, setLastResult, isScannerVisible, isLoading, setIsScannerVisible, setIsScanning }: {
   lastResult: BarcodeLookupResponse | null,
@@ -22,7 +22,13 @@ export function BarcodeScanner({ lastResult, setLastResult, isScannerVisible, is
         <button onClick={() => { setIsScanning(true); setLastResult(null) }} className='border-black p-4'>Scan Again</button>
       </div>
       <h2>Scanning</h2>
-      <div id='reader' className='rounded-bl-2xl rounded-br-2xl'></div>
+      {/*<div id='reader' className='rounded-bl-2xl rounded-br-2xl'></div> */}
+      <input className='border border-white' onKeyDown={(e) => {
+        if (e.key == 'Enter') {
+          console.log('SUBMITTEINDG', e.currentTarget.value)
+          socket.emit('barcode', e.currentTarget.value)
+        }
+      }} />
       {lastResult && BarcodeResponse({ lastResult, setLastResult, isLoading, setIsScanning, setIsScannerVisible })}
     </div >
 
