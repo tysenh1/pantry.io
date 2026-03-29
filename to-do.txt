@@ -15,6 +15,8 @@ Also maybe include a fuzzy find step for scanning items that are in the db alrea
 
 Finish off the readme
 
+add something to tell the user if they're missing something from the recipes when they add/scan them in
+
 flow of adding an item to db:
     User scans in an item
     item is fetched from OFF (open food facts db)
