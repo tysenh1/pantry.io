@@ -33,9 +33,9 @@ const runImport = db.transaction(() => {
     pantryStmt.run(item.id, item.generic_name_id, item.quantity, item.is_staple);
   }
 
-  const recipeStmt = db.prepare("INSERT INTO recipes (id, name, instructions, ingredients, tags) VALUES (?, ?, ?, ?, ?)");
+  const recipeStmt = db.prepare("INSERT INTO recipes (id, name, instructions, tags) VALUES (?, ?, ?, ?)");
   for (const recipe of seedRecipes) {
-    recipeStmt.run(recipe.id, recipe.name, recipe.instructions, recipe.ingredients, recipe.tags);
+    recipeStmt.run(recipe.id, recipe.name, recipe.instructions, recipe.tags);
   }
 
   const ingredientStmt = db.prepare("INSERT INTO recipe_ingredients (id, ingredient_id, quantity_needed, unit) VALUES (?, ?, ?, ?)");

@@ -1,6 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { GenericName, Pantry, Recipes, RecipeIngredients } from '../api/v1/types'
-import type { Item } from '../../../shared/types';
 
 // Fixed IDs object - using pantry item names as keys for proper mapping
 const recipeIds = {
@@ -411,7 +410,7 @@ export const seedRecipes = [
     name: "Garlic Butter Chicken",
     tags: "Quick, High Protein, Low Carb",
     instructions: "1. Dice chicken into bite-sized pieces. 2. Sauté minced garlic in butter and oil. 3. Add chicken and cook until golden brown.",
-    ingredients: "Chicken Breast, Garlic, Butter, Olive Oil",
+    // ingredients: "Chicken Breast, Garlic, Butter, Olive Oil",
     mappedIngredients: [  // <-- KEEPING EXACTLY AS IS
       { name: "Chicken Breast", qty: 500, unit: "g" },
       { name: "Garlic", qty: 3, unit: "cloves" },
@@ -423,7 +422,7 @@ export const seedRecipes = [
     id: recipeIds.tacos,
     name: "Beef Tacos",
     tags: "Mexican, Family Style, Quick",
-    ingredients: "Ground Beef, Tortillas, Onion, Cheddar Cheese",
+    // ingredients: "Ground Beef, Tortillas, Onion, Cheddar Cheese",
     instructions: "1. Brown the beef with diced onions. 2. Warm the tortillas in a pan. 3. Assemble with shredded cheese.",
     mappedIngredients: [
       { name: "Ground Beef", qty: 500, unit: "g" },
@@ -436,7 +435,7 @@ export const seedRecipes = [
     id: recipeIds.stirfry,
     name: "Chicken & Broccoli Stir Fry",
     tags: "Asian, Healthy, One-Pan",
-    ingredients: "Chicken Breast, Broccoli, Soy Sauce, Garlic, Rice",
+    // ingredients: "Chicken Breast, Broccoli, Soy Sauce, Garlic, Rice",
     instructions: "1. Slice chicken and broccoli. 2. Stir fry chicken until opaque. 3. Add broccoli and soy sauce. 4. Serve over boiled rice.",
     mappedIngredients: [
       { name: "Chicken Breast", qty: 400, unit: "g" },
@@ -449,7 +448,7 @@ export const seedRecipes = [
     id: recipeIds.curry,
     name: "Red Chicken Curry",
     tags: "Spicy, Thai, Hearty",
-    ingredients: "Chicken Breast, Coconut Milk, Red Curry Paste, Bell Peppers, Rice",
+    // ingredients: "Chicken Breast, Coconut Milk, Red Curry Paste, Bell Peppers, Rice",
     instructions: "1. Simmer curry paste with coconut milk. 2. Add sliced chicken and peppers. 3. Cook until tender and serve with rice.",
     mappedIngredients: [
       { name: "Chicken Breast", qty: 500, unit: "g" },
@@ -462,7 +461,7 @@ export const seedRecipes = [
     id: recipeIds.pasta,
     name: "Simple Spaghetti Aglio e Olio",
     tags: "Vegetarian, Italian, Pantry Staples",
-    ingredients: "Spaghetti, Garlic, Olive Oil, Red Pepper Flakes",
+    // ingredients: "Spaghetti, Garlic, Olive Oil, Red Pepper Flakes",
     instructions: "1. Boil spaghetti. 2. Sauté a lot of garlic in olive oil. 3. Toss pasta in the oil with a splash of pasta water.",
     mappedIngredients: [
       { name: "Spaghetti", qty: 250, unit: "g" },
@@ -474,7 +473,7 @@ export const seedRecipes = [
     id: recipeIds.steak,
     name: "Classic Steak and Peppers",
     tags: "High Protein, Dinner",
-    ingredients: "Beef Steak, Bell Peppers, Onion, Butter",
+    // ingredients: "Beef Steak, Bell Peppers, Onion, Butter",
     instructions: "1. Sear steak in a hot pan. 2. Remove and sauté sliced peppers and onions. 3. Slice steak and serve together.",
     mappedIngredients: [
       { name: "Beef Steak", qty: 400, unit: "g" },
@@ -488,7 +487,7 @@ export const seedRecipes = [
     id: recipeIds.pizza,
     name: "Margherita Pizza",
     tags: "Italian, Vegetarian, Comfort",
-    ingredients: "Tomato Sauce, Mozzarella Cheese, Flour, Olive Oil",
+    // ingredients: "Tomato Sauce, Mozzarella Cheese, Flour, Olive Oil",
     instructions: "1. Mix flour, water, yeast for dough. 2. Spread tomato sauce and mozzarella. 3. Bake at 450°F for 12-15 mins.",
     mappedIngredients: [
       { name: "Tomato Sauce", qty: 200, unit: "g" },
@@ -501,7 +500,7 @@ export const seedRecipes = [
     id: recipeIds.pancakes,
     name: "Fluffy Pancakes",
     tags: "Breakfast, Quick, Family",
-    ingredients: "Flour, Eggs, Milk, Baking Powder, Sugar",
+    // ingredients: "Flour, Eggs, Milk, Baking Powder, Sugar",
     instructions: "1. Mix dry ingredients. 2. Add wet ingredients and whisk. 3. Cook on medium heat until golden both sides.",
     mappedIngredients: [
       { name: "Flour", qty: 200, unit: "g" },
@@ -515,7 +514,7 @@ export const seedRecipes = [
     id: recipeIds.chili,
     name: "Beef Chili",
     tags: "Hearty, Spicy, Freezer Friendly",
-    ingredients: "Ground Beef, Tomatoes, Onion, Bell Peppers",
+    // ingredients: "Ground Beef, Tomatoes, Onion, Bell Peppers",
     instructions: "1. Brown beef with onions. 2. Add chopped tomatoes and peppers. 3. Simmer 30 mins with chili powder.",
     mappedIngredients: [
       { name: "Ground Beef", qty: 500, unit: "g" },
@@ -528,7 +527,7 @@ export const seedRecipes = [
     id: recipeIds.sushi,
     name: "California Roll",
     tags: "Japanese, Healthy, Fun",
-    ingredients: "White Rice, Nori Sheets, Avocado, Shrimp",
+    // ingredients: "White Rice, Nori Sheets, Avocado, Shrimp",
     instructions: "1. Cook sushi rice. 2. Lay nori, rice, fillings. 3. Roll tightly and slice.",
     mappedIngredients: [
       { name: "White Rice", qty: 200, unit: "g" },
@@ -541,7 +540,7 @@ export const seedRecipes = [
     id: recipeIds.lasagna,
     name: "Classic Lasagna",
     tags: "Italian, Family Dinner, Make Ahead",
-    ingredients: "Ground Beef, Lasagna Noodles, Tomato Sauce, Cheddar Cheese",
+    // ingredients: "Ground Beef, Lasagna Noodles, Tomato Sauce, Cheddar Cheese",
     instructions: "1. Layer noodles, beef sauce, cheese. 2. Bake covered 45 mins at 375°F. 3. Uncover last 15 mins.",
     mappedIngredients: [
       { name: "Ground Beef", qty: 600, unit: "g" },
@@ -554,7 +553,7 @@ export const seedRecipes = [
     id: recipeIds.stirfryVeg,
     name: "Veggie Stir Fry",
     tags: "Vegan, Quick, Healthy",
-    ingredients: "Broccoli, Bell Peppers, Soy Sauce, Zucchini",
+    // ingredients: "Broccoli, Bell Peppers, Soy Sauce, Zucchini",
     instructions: "1. Chop veggies evenly. 2. High heat stir fry 5-7 mins. 3. Add soy sauce last minute.",
     mappedIngredients: [
       { name: "Broccoli", qty: 1, unit: "head" },
@@ -567,7 +566,7 @@ export const seedRecipes = [
     id: recipeIds.quesadilla,
     name: "Chicken Quesadilla",
     tags: "Mexican, Quick, Kid Friendly",
-    ingredients: "Chicken Breast, Cheddar Cheese, Tortillas, Onion",
+    // ingredients: "Chicken Breast, Cheddar Cheese, Tortillas, Onion",
     instructions: "1. Shred cooked chicken. 2. Fill tortilla with chicken, cheese, onions. 3. Pan fry until crispy.",
     mappedIngredients: [
       { name: "Chicken Breast", qty: 200, unit: "g" },
@@ -580,7 +579,7 @@ export const seedRecipes = [
     id: recipeIds.friedRice,
     name: "Chicken Fried Rice",
     tags: "Asian, One Pan, Leftovers",
-    ingredients: "White Rice, Eggs, Chicken Breast, Soy Sauce",
+    // ingredients: "White Rice, Eggs, Chicken Breast, Soy Sauce",
     instructions: "1. Scramble eggs, set aside. 2. Stir fry chicken and cold rice. 3. Add soy and eggs.",
     mappedIngredients: [
       { name: "White Rice", qty: 300, unit: "g" },
@@ -593,7 +592,7 @@ export const seedRecipes = [
     id: recipeIds.omelette,
     name: "Veggie Omelette",
     tags: "Breakfast, Quick, High Protein",
-    ingredients: "Eggs, Spinach, Onion, Cheddar Cheese",
+    // ingredients: "Eggs, Spinach, Onion, Cheddar Cheese",
     instructions: "1. Whisk eggs. 2. Sauté veggies. 3. Pour eggs over, fold when set.",
     mappedIngredients: [
       { name: "Eggs", qty: 3, unit: "pcs" },
@@ -606,7 +605,7 @@ export const seedRecipes = [
     id: recipeIds.padthai,
     name: "Chicken Pad Thai",
     tags: "Thai, Spicy, Noodles",
-    ingredients: "Chicken Breast, Spaghetti, Peanut Butter, Lime",
+    // ingredients: "Chicken Breast, Spaghetti, Peanut Butter, Lime",
     instructions: "1. Stir fry chicken and noodles. 2. Add peanut sauce and lime. 3. Garnish with peanuts.",
     mappedIngredients: [
       { name: "Chicken Breast", qty: 300, unit: "g" },
@@ -619,7 +618,7 @@ export const seedRecipes = [
     id: recipeIds.burgers,
     name: "Classic Beef Burgers",
     tags: "American, BBQ, Family",
-    ingredients: "Ground Beef, Bun, Onion, Cheddar Cheese",
+    // ingredients: "Ground Beef, Bun, Onion, Cheddar Cheese",
     instructions: "1. Form beef patties. 2. Grill 4-5 mins per side. 3. Serve on buns with toppings.",
     mappedIngredients: [
       { name: "Ground Beef", qty: 400, unit: "g" },
@@ -632,7 +631,7 @@ export const seedRecipes = [
     id: recipeIds.soup,
     name: "Tomato Soup",
     tags: "Comfort, Quick, Vegetarian",
-    ingredients: "Tomatoes, Onion, Garlic, Milk",
+    // ingredients: "Tomatoes, Onion, Garlic, Milk",
     instructions: "1. Sauté onion and garlic. 2. Add tomatoes and simmer 20 mins. 3. Blend smooth, add milk.",
     mappedIngredients: [
       { name: "Tomatoes", qty: 6, unit: "pcs" },
@@ -645,7 +644,7 @@ export const seedRecipes = [
     id: recipeIds.cookies,
     name: "Chocolate Chip Cookies",
     tags: "Dessert, Baking, Kid Friendly",
-    ingredients: "Flour, Butter, Sugar, Eggs",
+    // ingredients: "Flour, Butter, Sugar, Eggs",
     instructions: "1. Cream butter and sugar. 2. Add eggs and flour. 3. Bake 10-12 mins at 375°F.",
     mappedIngredients: [
       { name: "Flour", qty: 250, unit: "g" },
