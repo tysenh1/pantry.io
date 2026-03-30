@@ -2,21 +2,11 @@ import type { Request, Response, NextFunction } from 'express';
 import * as itemService from "../services/itemService.ts";
 import { successResponse } from "../models/responseModel.ts";
 
-
-export const getItems = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
-  res.status(200).json(successResponse('', "It's a workin"))
-}
-
 export const createItem = async (
   req: Request,
   res: Response,
   next: NextFunction
 ): Promise<void> => {
-  console.log("THIS IS RUNINNG")
   try {
     const newItem = await itemService.createItem(req.body);
 

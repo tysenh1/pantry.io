@@ -20,7 +20,6 @@ export interface Recipes {
   id: string;
   name: string;
   instructions: string;
-  ingredients: string;
   tags: string;
 }
 

@@ -3,8 +3,6 @@ import * as itemController from "../controllers/itemController.ts";
 
 const router: Router = express.Router();
 
-router.get("/", itemController.getItems)
-
 router.post("/", itemController.createItem);
 
 router.post('/barcodeTest', itemController.barcodeTest)

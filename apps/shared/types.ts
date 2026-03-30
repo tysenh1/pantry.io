@@ -11,8 +11,28 @@ export interface GenericNameInfo {
   name: string;
 }
 
+export interface pantryGenericNameResponse {
+  pantryId: string;
+  name: string;
+  primary_unit: string;
+}
+
 export interface BarcodeLookupResponse {
   doesItemExist: boolean;
   item: Omit<ItemInfo, 'genericName'>;
   genericNames: GenericNameInfo[]
+}
+
+export interface Recipe {
+  name: string;
+  instructions: string;
+  tags: string;
+  ingredients: RecipeIngredients[];
+}
+
+export interface RecipeIngredients {
+  id: string;
+  name: string;
+  quantityNeeded: number;
+  unit: string;
 }
