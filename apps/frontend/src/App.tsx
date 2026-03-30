@@ -5,6 +5,7 @@ import 'github-markdown-css/github-markdown-dark.css';
 import { socket } from './lib/socket.ts';
 import { useScanner } from './hooks/useScanner.ts';
 import { BarcodeScanner } from './components/pantry/BarcodeScanner/BarcodeScanner.tsx';
+import { RecipeForm } from './components/recipe/RecipeForm.tsx';
 
 
 
@@ -14,6 +15,7 @@ function App() {
   const [input, setInput] = useState('');
   const chatEnd = useRef<HTMLDivElement | null>(null);
   const { lastResult, setLastResult, isLoading, isScannerVisible, setIsScannerVisible, setIsScanning } = useScanner(socket)
+  const [isRecipeFormVisible, setIsRecipeFormVisible] = useState(false)
 
   useEffect(() => {
     socket.on('ai_stream', (text) => {
@@ -27,18 +29,11 @@ function App() {
       })
     })
 
-
-
     return () => {
       socket.off('ai_stream');
       socket.off('agent_status');
     };
   }, [])
-
-
-
-
-
 
   const send = () => {
     if (!input) return;
@@ -49,15 +44,18 @@ function App() {
 
   useEffect(() => chatEnd.current?.scrollIntoView({ behavior: "smooth" }), [messages])
 
-
   return (
     <div className="h-screen bg-black text-green-500 font-mono p-4 flex flex-col">
       {/* Header */}
       <div className="border-b border-green-800 pb-2 mb-4 flex justify-between items-center">
         <h1 className="text-xl tracking-widest">KITCHEN_OS</h1>
-        <button onClick={() => { setIsScannerVisible(true); setIsScanning(true); }} className='bg-white cursor-pointer'>Start barcode scanner</button>
-        {/* <button onClick={() => { setIsScannerVisible(true); setIsScanning(true); socket.emit('barcode', '0068437389693'); }} className='bg-white cursor-pointer'>Start barcode scanner</button> */}
+        <div>
+          <button onClick={() => { setIsScannerVisible(true); setIsScanning(true); }} className='bg-white cursor-pointer p-2 m-2 rounded-xl'>Start barcode scanner</button>
+          <button onClick={() => setIsRecipeFormVisible(true)} className='bg-white cursor-pointer p-2 m-2 rounded-xl'>Show Recipe Form</button>
+        </div>
       </div>
+
+      <RecipeForm setIsRecipeFormVisible={setIsRecipeFormVisible} isRecipeFormVisible={isRecipeFormVisible} />
 
       <BarcodeScanner lastResult={lastResult} setLastResult={setLastResult} isScannerVisible={isScannerVisible} isLoading={isLoading} setIsScannerVisible={setIsScannerVisible} setIsScanning={setIsScanning} />
 

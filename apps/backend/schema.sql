@@ -19,12 +19,13 @@ CREATE TABLE IF NOT EXISTS recipes(
     tags TEXT
 );
 CREATE TABLE IF NOT EXISTS recipe_ingredients(
-    id TEXT,
-    ingredient_id TEXT,
+    recipe_id TEXT,
+    pantry_id TEXT,
     quantity_needed INTEGER,
     unit TEXT,
-    FOREIGN KEY(ingredient_id) REFERENCES pantry(id) ON DELETE CASCADE,
-    FOREIGN KEY(id) REFERENCES recipes(id) ON DELETE CASCADE
+    PRIMARY KEY(recipe_id, pantry_id)
+    FOREIGN KEY(pantry_id) REFERENCES pantry(id) ON DELETE CASCADE,
+    FOREIGN KEY(recipe_id) REFERENCES recipes(id) ON DELETE CASCADE
 );
 CREATE TABLE IF NOT EXISTS item(
     id TEXT PRIMARY KEY,

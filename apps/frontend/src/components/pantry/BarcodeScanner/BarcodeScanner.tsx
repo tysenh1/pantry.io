@@ -16,22 +16,24 @@ export function BarcodeScanner({ lastResult, setLastResult, isScannerVisible, is
 
   return (
 
-    <div className={`relative z-10 bg-black rounded-2xl border-white border t-50% l-50% ${isScannerVisible ? 'block' : 'hidden'}`} >
-      <div>
-        <button onClick={() => { setIsScannerVisible(false); setIsScanning(false) }} className='border-black p-4'>Close Scanner</button>
-        <button onClick={() => { setIsScanning(true); setLastResult(null) }} className='border-black p-4'>Scan Again</button>
+    (isScannerVisible && <div className={`fixed inset-0 flex items-center justify-center z-50 backdrop-blur-xs`} >
+      <div className='bg-black border border-white w-2/3 h-2/3 flex flex-col rounded-xl'>
+        <div>
+          <button onClick={() => { setIsScannerVisible(false); setIsScanning(false) }} className='bg-white p-2 cursor-pointer rounded-xl m-2'>Close Scanner</button>
+          <button onClick={() => { setIsScanning(true); setLastResult(null) }} className='bg-white p-2 cursor-pointer rounded-xl m-2'>Scan Again</button>
+        </div>
+        <h2>Scanning</h2>
+        {/*<div id='reader' className='rounded-bl-2xl rounded-br-2xl'></div> */}
+        <input className='border border-white' onKeyDown={(e) => {
+          if (e.key == 'Enter') {
+            console.log('SUBMITTEINDG', e.currentTarget.value)
+            socket.emit('barcode', e.currentTarget.value)
+          }
+        }} />
+        {lastResult && BarcodeResponse({ lastResult, setLastResult, isLoading, setIsScanning, setIsScannerVisible })}
       </div>
-      <h2>Scanning</h2>
-      {/*<div id='reader' className='rounded-bl-2xl rounded-br-2xl'></div> */}
-      <input className='border border-white' onKeyDown={(e) => {
-        if (e.key == 'Enter') {
-          console.log('SUBMITTEINDG', e.currentTarget.value)
-          socket.emit('barcode', e.currentTarget.value)
-        }
-      }} />
-      {lastResult && BarcodeResponse({ lastResult, setLastResult, isLoading, setIsScanning, setIsScannerVisible })}
     </div >
-
+    )
   )
 }
 
