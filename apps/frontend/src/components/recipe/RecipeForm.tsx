@@ -13,6 +13,7 @@ export function RecipeForm({ setIsRecipeFormVisible, isRecipeFormVisible }: {
   const [tags, setTags] = useState('')
   const [ingredientInputList, setIngredientInputList] = useState<RecipeIngredients[]>([{ id: '', name: '', quantityNeeded: 0, unit: '' }])
   const [genericNames, setGenericNames] = useState<pantryGenericNameResponse[] | null>(null)
+  const [isSuccessModalVisible, setIsSuccessModalVisible] = useState(false)
 
   const handleQuantityChange = (index: number, event: React.ChangeEvent<HTMLInputElement>) => {
     const newInputs = [...ingredientInputList]
@@ -55,12 +56,21 @@ export function RecipeForm({ setIsRecipeFormVisible, isRecipeFormVisible }: {
         ingredients: ingredientInputList
       }
       addRecipe(recipe)
-
-      setIsRecipeFormVisible(false)
+      setIsSuccessModalVisible(true)
 
     } catch (err) {
       alert(err)
     }
+  }
+
+  const SuccessModal = () => {
+    return (
+      <div className="fixed bg-black border border-white w-1/3 h-1/3 flex flex-col rounded-xl items-center justify-center">
+        <h2 className="text-3xl font-bold">Success!</h2>
+        <p>{name} has been added to the database!</p>
+        <button onClick={() => setIsRecipeFormVisible(false)} className="bg-white cursor-pointer rounded-xl p-2 m-2">Continue</button>
+      </div>
+    )
   }
 
   const handleNameChange = (e: React.ChangeEvent<HTMLSelectElement>, index: number) => {
@@ -127,6 +137,7 @@ export function RecipeForm({ setIsRecipeFormVisible, isRecipeFormVisible }: {
           <button className="border border-white my-4" type="button" onClick={(e) => handleSubmit(e)}>Submit</button>
         </form>
       </div>
+      {isSuccessModalVisible && <SuccessModal />}
     </div >
     )
   )
