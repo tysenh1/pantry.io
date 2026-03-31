@@ -66,6 +66,7 @@ export interface KitchenTools {
   // getPantry: () => Promise<string>;
   browseAllRecipes: (args: { tags?: string, keywords?: string }) => Promise<string>;
   getRecipeDetails: (args: { recipe_id: any }) => Promise<string>;
+  subtractRecipeIngredientQuantities: (args: { recipe_id: string }) => Promise<string>;
 }
 
 export interface LLMResponse {
@@ -101,8 +102,11 @@ export interface OFFProductResponse {
 
 export interface QuantityUpdateInfo {
   quantity: number;
-  name: string;
   primary_unit: string;
   weight_per_piece: number;
-  id: string;
+}
+
+export interface SubtractQuantitiesResult {
+  name: string;
+  newQuantity: number;
 }
