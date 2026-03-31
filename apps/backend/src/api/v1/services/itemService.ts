@@ -4,7 +4,7 @@ import { db } from '../config/db.ts';
 import type { OFFResponse } from '../types.ts';
 import { randomUUID } from 'crypto';
 import { type ProductV2 } from '@openfoodfacts/openfoodfacts-nodejs'
-import { parseUnit, parseQuantity, findGenericMatch, incrementQuantity, getNewQuantity } from '../utils/itemUtils.ts';
+import { parseUnit, parseQuantity, findGenericMatch, incrementQuantity, addQuantity } from '../utils/itemUtils.ts';
 import { ExternalLookupError } from '../errors/errors.ts';
 import { ERROR_CODE } from '../../../constants/errorConstants.ts';
 
