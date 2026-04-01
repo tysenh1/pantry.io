@@ -125,6 +125,7 @@ export const addQuantity = (info: QuantityUpdateInfo, unitSize: number, unitType
 const CONVERSION_RATES: Record<string, number> = {
   "lb": 453.59,
   "oz": 28.35,
+  'fl_oz': 28.41,
   "kg": 1000,
   "l": 1000,
   "ml": 1,
@@ -132,7 +133,12 @@ const CONVERSION_RATES: Record<string, number> = {
   "pcs": 1
 };
 
-function normalizeQuantity(amount: number, unit: string): number {
+export function normalizeQuantity(amount: number, unit: string): number {
   const rate = CONVERSION_RATES[unit.toLowerCase()];
-  return rate ? amount * rate : amount;
+  // return rate !== undefined ? amount * rate : amount;
+  if (rate !== undefined) {
+    return amount * rate
+  } else {
+    return amount
+  }
 }
