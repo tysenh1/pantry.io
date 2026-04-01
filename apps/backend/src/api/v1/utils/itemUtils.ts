@@ -88,7 +88,7 @@ export const incrementQuantity = async (item: ItemInfo): Promise<ItemInfo> => {
   const quantityUpdateInfo: QuantityUpdateInfo = await db.prepare(`
 SELECT p.quantity, g.primary_unit, g.weight_per_piece FROM generic_name g JOIN pantry p ON p.generic_name_id = g.id WHERE g.id = ?
 `).get(item.genericName.id)
-  const newQuantity = getNewQuantity(quantityUpdateInfo, item.unitSize, item.unitType)
+  const newQuantity = addQuantity(quantityUpdateInfo, item.unitSize, item.unitType)
 
   await db.prepare(`
   UPDATE pantry SET quantity = ? WHERE generic_name_id = ?

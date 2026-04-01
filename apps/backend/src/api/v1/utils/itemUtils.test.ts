@@ -96,3 +96,23 @@ describe('parseQuantity()', () => {
     expect(result).toBe(200)
   })
 })
+
+
+describe('findGenericMatch()', () => {
+
+})
+
+
+describe('incrementQuantity()', () => {
+
+})
+
+
+describe('addQuantity()', () => {
+
+})
+
+
+describe('normalizeQuantity()', () => {
+
+})
