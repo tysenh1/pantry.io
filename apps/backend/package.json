@@ -5,7 +5,8 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "dev": "nodemon"
   },
   "keywords": [],
@@ -26,6 +27,8 @@
     "fuse.js": "^7.1.0",
     "ollama": "^0.6.3",
     "socket.io": "^4.8.3",
-    "tsx": "^4.21.0"
+    "supertest": "^7.2.2",
+    "tsx": "^4.21.0",
+    "vitest": "^4.1.2"
   }
 }

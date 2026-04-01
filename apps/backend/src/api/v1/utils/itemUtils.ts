@@ -10,17 +10,17 @@ export function parseUnit(product: ProductV2): string {
 
   if (product.product_quantity_unit) {
     return product.product_quantity_unit
-  } else if (product.net_weight_unit) {
-    return product.net_weight_unit
-  } else if (product.product_quantity_string) {
-    const regexArray = product.product_quantity_string.match(UNIT_REGEX)
-    if (regexArray[2]) {
-      return regexArray[2] ? regexArray[2] as string : ''
-    }
+    // } else if (product.net_weight_unit) {
+    //   return product.net_weight_unit
+    // } else if (product.product_quantity_string) {
+    //   const regexArray = product.product_quantity_string.match(UNIT_REGEX)
+    //   if (regexArray[2]) {
+    //     return regexArray[2] ? regexArray[2] as string : ''
+    //   }
   } else if (product.quantity) {
     const regexArray = product.quantity.match(UNIT_REGEX)
-    if (regexArray[2]) {
-      return regexArray[2] ? regexArray[2] as string : ''
+    if (regexArray !== null && regexArray[2] !== null && regexArray[2] !== '') {
+      return regexArray[2] as string
     }
   }
 
@@ -30,12 +30,18 @@ export function parseUnit(product: ProductV2): string {
 
 export function parseQuantity(product: ProductV2): number {
   let finalQuantity = 0;
-  if (product.product_quantity) {
-    // @ts-expect-error type is actually a number and turning it into a string removes decimal values
-    finalQuantity = product.product_quantity as number
-  } else if (product.quantity) {
+  // if (product.product_quantity) {
+  //   // @ts-expect-error type is actually a number and turning it into a string removes decimal values
+  //   finalQuantity = product.product_quantity as number
+  // } else if (product.quantity) {
+  //   const regexArray = product.quantity.match(UNIT_REGEX)
+  //   if (regexArray !== null && regexArray[1] !== null && regexArray[1] !== '') {
+  //     finalQuantity = parseFloat(regexArray[1])
+  //   }
+  // }
+  if (product.quantity) {
     const regexArray = product.quantity.match(UNIT_REGEX)
-    if (regexArray[1]) {
+    if (regexArray !== null && regexArray[1] !== null && regexArray[1] !== '') {
       finalQuantity = parseFloat(regexArray[1])
     }
   }
@@ -88,7 +94,7 @@ export const incrementQuantity = async (item: ItemInfo): Promise<ItemInfo> => {
   const quantityUpdateInfo: QuantityUpdateInfo = await db.prepare(`
 SELECT p.quantity, g.primary_unit, g.weight_per_piece FROM generic_name g JOIN pantry p ON p.generic_name_id = g.id WHERE g.id = ?
 `).get(item.genericName.id)
-  const newQuantity = addQuantity(quantityUpdateInfo, item.unitSize, item.unitType)
+  const newQuantity = getNewQuantity(quantityUpdateInfo, item.unitSize, item.unitType)
 
   await db.prepare(`
   UPDATE pantry SET quantity = ? WHERE generic_name_id = ?
