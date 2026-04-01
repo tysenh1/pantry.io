@@ -81,7 +81,7 @@ export interface OFFResponse {
   code: string;
   status: number;
   status_verbose: string;
-  product: ProductV2;
+  product: Product;
 }
 
 export interface OFFProductResponse {
@@ -99,6 +99,15 @@ export interface OFFProductResponse {
   product_quantity_unit: string;
   net_weight_unit?: string;
 }
+
+// ADD ANY MISSING TYPES HERE FOR THE OFF PRODUCT TYPE
+export interface OffProductExtras {
+  net_weight_unit?: string;
+  product_quantity_string?: string;
+  product_quantity?: number;
+}
+
+export type Product = ProductV2 & OffProductExtras
 
 export interface QuantityUpdateInfo {
   quantity: number;
