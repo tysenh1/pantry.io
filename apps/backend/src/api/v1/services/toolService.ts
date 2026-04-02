@@ -132,18 +132,26 @@ function normalizeRecipeQuantities(recipes: any[]) {
 }
 
 const subtractQuantity = (info: QuantityUpdateInfo, unitSize: number, unitType: string) => {
-  if (info.primary_unit == unitType) {
-    return info.quantity - unitSize;
+  if (info.primary_unit === unitType) {
+    return Math.floor(info.quantity - unitSize);
   }
 
   if (unitType === 'pcs' && info.primary_unit !== 'pcs') {
-    const amountGrams = unitSize * info.weight_per_piece
-    const rate = CONVERSION_RATES[info.primary_unit.toLowerCase()]
-    return rate ? amountGrams / rate : amountGrams
+    const amountGrams = unitSize * (info.weight_per_piece ?? 0);
+    const subtractInPrimary = normalizeQuantity(amountGrams, 'g', info.primary_unit);
+    return Math.floor(info.quantity - subtractInPrimary);
   }
 
-  return normalizeQuantity(-unitSize, unitType)
-}
+  if (unitType !== 'pcs' && info.primary_unit === 'pcs') {
+    const amountGrams = info.quantity * info.weight_per_piece
+    const amountToAdd = normalizeQuantity(unitSize, unitType, 'g')
+    return Math.floor((amountGrams - amountToAdd) / info.weight_per_piece)
+  }
+
+  // General: Convert unitSize@unitType → primary_unit, then subtract
+  const subtractInPrimary = normalizeQuantity(unitSize, unitType, info.primary_unit);
+  return Math.floor(info.quantity - subtractInPrimary);
+};
 
 export const toolDefinitions: Tool[] = [
   // {

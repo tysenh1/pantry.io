@@ -108,17 +108,23 @@ SELECT p.quantity, g.primary_unit, g.weight_per_piece FROM generic_name g JOIN p
 export const addQuantity = (info: QuantityUpdateInfo, unitSize: number, unitType: string) => {
 
   if (info.primary_unit == unitType) {
-    return info.quantity + unitSize
+    return Math.floor(info.quantity + unitSize)
   }
 
   if (unitType === 'pcs' && info.primary_unit !== 'pcs') {
-    const amountGrams = unitSize * info.weight_per_piece
+    const amountGrams = unitSize * (info.weight_per_piece ?? 0);
     // This is mostly here as a safeguard in case I add more units that the pantry can have, right now its just ml, g and pcs
-    const rate = CONVERSION_RATES[info.primary_unit.toLowerCase()]
-    return rate ? amountGrams / rate : amountGrams
+    return Math.floor(info.quantity + normalizeQuantity(amountGrams, 'g', info.primary_unit))
   }
 
-  return normalizeQuantity(unitSize, unitType)
+  if (unitType !== 'pcs' && info.primary_unit === 'pcs') {
+    const amountGrams = info.quantity * info.weight_per_piece
+    const amountToAdd = normalizeQuantity(unitSize, unitType, 'g')
+    return Math.floor((amountGrams + amountToAdd) / info.weight_per_piece)
+  }
+
+  const newQuantity = normalizeQuantity(unitSize, unitType, info.primary_unit)
+  return Math.floor(info.quantity + newQuantity)
 
 }
 
@@ -133,12 +139,11 @@ const CONVERSION_RATES: Record<string, number> = {
   "pcs": 1
 };
 
-export function normalizeQuantity(amount: number, unit: string): number {
-  const rate = CONVERSION_RATES[unit.toLowerCase()];
-  // return rate !== undefined ? amount * rate : amount;
-  if (rate !== undefined) {
-    return amount * rate
-  } else {
-    return amount
+export function normalizeQuantity(amount: number, fromUnit: string, toUnit: string = 'g'): number {
+  const fromRate = CONVERSION_RATES[fromUnit.toLowerCase()];
+  const toRate = CONVERSION_RATES[toUnit.toLowerCase()];
+  if (fromRate === undefined || toRate === undefined) {
+    return amount;
   }
+  return (amount * fromRate) / toRate;
 }
