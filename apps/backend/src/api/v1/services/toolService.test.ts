@@ -2,9 +2,10 @@ import { describe, it, beforeEach, expect } from "vitest";
 import fs from 'fs';
 import Database from 'better-sqlite3';
 import { type Database as Sqlite3Database } from 'better-sqlite3';
-import { toolsLogic } from "./toolService";
+import { normalizeRecipeQuantities, subtractQuantity, toolsLogic } from "./toolService";
 import { createSchema } from "../../../seed/importSeed";
 import { seedTestData } from "../../../seed/testSeed";
+import { QuantityUpdateInfo } from "../types";
 
 let db: Sqlite3Database
 
@@ -115,8 +116,276 @@ describe('subtractRecipeIngredientQuantities()', () => {
   })
 })
 
-describe('convertToPrimaryUnits()', () => { })
+describe('normalizeRecipeQuantities()', () => {
+  describe('when pantry quantity is greater than the needed quantity', () => {
+    it('should return all recipes when both units are grams', () => {
+      const recipes = [
+        {
+          pantry_quantity: 500,
+          primary_unit: 'g',
+          quantity_needed: 200,
+          ingredient_unit: 'g'
+        },
+        {
+          pantry_quantity: 100,
+          primary_unit: 'g',
+          quantity_needed: 10,
+          ingredient_unit: 'g'
+        }
+      ]
 
-describe('normalizeRecipeQuantities()', () => { })
+      const result = normalizeRecipeQuantities(recipes)
 
-describe('subtractQuantity()', () => { })
+      expect(result).toMatchObject(recipes)
+    })
+
+    it('should return all recipes when pantry is grams and ingredient is not grams', () => {
+      const recipes = [
+        {
+          pantry_quantity: 500,
+          primary_unit: 'g',
+          quantity_needed: 10,
+          ingredient_unit: 'oz'
+        },
+        {
+          pantry_quantity: 1000,
+          primary_unit: 'g',
+          quantity_needed: 1,
+          ingredient_unit: 'lb'
+        }
+      ]
+
+      const result = normalizeRecipeQuantities(recipes)
+
+      expect(result).toMatchObject(recipes)
+    })
+
+    it('should return all recipes when pantry is not grams and ingredient is grams', () => {
+      const recipes = [
+        {
+          pantry_quantity: 500,
+          primary_unit: 'kg',
+          quantity_needed: 200,
+          ingredient_unit: 'g'
+        },
+        {
+          pantry_quantity: 100,
+          primary_unit: 'oz',
+          quantity_needed: 10,
+          ingredient_unit: 'g'
+        }
+      ]
+
+      const result = normalizeRecipeQuantities(recipes)
+
+      expect(result).toMatchObject(recipes)
+    })
+
+    it('should return all recipes when neither unit is grams', () => {
+      const recipes = [
+        {
+          pantry_quantity: 500,
+          primary_unit: 'lb',
+          quantity_needed: 200,
+          ingredient_unit: 'oz'
+        },
+        {
+          pantry_quantity: 100,
+          primary_unit: 'kg',
+          quantity_needed: 10,
+          ingredient_unit: 'oz'
+        }
+      ]
+
+      const result = normalizeRecipeQuantities(recipes)
+
+      expect(result).toMatchObject(recipes)
+    })
+  })
+
+  describe('when one ingredient quantity is greater than pantry quantity', () => {
+    it('should return one recipe when both units are grams', () => {
+      const recipes = [
+        {
+          pantry_quantity: 500,
+          primary_unit: 'g',
+          quantity_needed: 200,
+          ingredient_unit: 'g'
+        },
+        {
+          pantry_quantity: 100,
+          primary_unit: 'g',
+          quantity_needed: 1000,
+          ingredient_unit: 'g'
+        }
+      ]
+
+      const result = normalizeRecipeQuantities(recipes)
+
+      expect(result).toMatchObject([recipes[0]])
+    })
+
+    it('should return one recipe when pantry is grams and ingredient is not grams', () => {
+      const recipes = [
+        {
+          pantry_quantity: 500,
+          primary_unit: 'g',
+          quantity_needed: 10,
+          ingredient_unit: 'oz'
+        },
+        {
+          pantry_quantity: 1000,
+          primary_unit: 'g',
+          quantity_needed: 10,
+          ingredient_unit: 'lb'
+        }
+      ]
+
+      const result = normalizeRecipeQuantities(recipes)
+
+      expect(result).toMatchObject([recipes[0]])
+    })
+
+    it('should return one recipe when pantry is not grams and ingredient is grams', () => {
+      const recipes = [
+        {
+          pantry_quantity: 500,
+          primary_unit: 'kg',
+          quantity_needed: 200,
+          ingredient_unit: 'g'
+        },
+        {
+          pantry_quantity: 100,
+          primary_unit: 'oz',
+          quantity_needed: 10000000,
+          ingredient_unit: 'g'
+        }
+      ]
+
+      const result = normalizeRecipeQuantities(recipes)
+
+      expect(result).toMatchObject([recipes[0]])
+    })
+
+    it('should return one recipe when neither unit is grams', () => {
+      const recipes = [
+        {
+          pantry_quantity: 500,
+          primary_unit: 'lb',
+          quantity_needed: 200,
+          ingredient_unit: 'oz'
+        },
+        {
+          pantry_quantity: 100,
+          primary_unit: 'kg',
+          quantity_needed: 10000000,
+          ingredient_unit: 'oz'
+        }
+      ]
+
+      const result = normalizeRecipeQuantities(recipes)
+
+      expect(result).toMatchObject([recipes[0]])
+    })
+  })
+})
+
+describe('subtractQuantity()', () => {
+  describe('when unitType equals info.primary_unit', () => {
+    it('subtracts grams quantity correctly', () => {
+      const info = {
+        primary_unit: 'g',
+        quantity: 200
+      }
+
+      const unitType = 'g'
+      const unitSize = 150
+
+      const result = subtractQuantity(info as QuantityUpdateInfo, unitSize, unitType)
+
+      expect(result).toBe(50)
+    })
+
+    it('subtracts ounces quantity correctly', () => {
+      const info = {
+        primary_unit: 'oz',
+        quantity: 15
+      }
+      const unitType = 'oz'
+      const unitSize = 4
+
+      const result = subtractQuantity(info as QuantityUpdateInfo, unitSize, unitType)
+
+      expect(result).toBe(11)
+    })
+  })
+
+  describe("when unitType doesn't equal info.primary_unit", () => {
+    it('subtracts grams and ounces correctly', () => {
+      const info = {
+        primary_unit: 'g',
+        quantity: 264
+      }
+      const unitType = 'oz'
+      const unitSize = 4
+
+      const result = subtractQuantity(info as QuantityUpdateInfo, unitSize, unitType)
+
+      expect(result).toBe(150)
+    })
+
+    it('subtracts grams and kg correctly', () => {
+      const info = {
+        primary_unit: 'g',
+        quantity: 2150
+      }
+      const unitType = 'kg'
+      const unitSize = 2
+
+      const result = subtractQuantity(info as QuantityUpdateInfo, unitSize, unitType)
+
+      expect(result).toBe(150)
+    })
+
+    it('subtracts ml and fluid ounces correctly', () => {
+      const info = {
+        primary_unit: 'ml',
+        quantity: 314
+      }
+      const unitType = 'fl_oz'
+      const unitSize = 4
+
+      const result = subtractQuantity(info as QuantityUpdateInfo, unitSize, unitType)
+
+      expect(result).toBe(200)
+    })
+
+    it('subtracts pcs and grams', () => {
+      const info = {
+        primary_unit: 'pcs',
+        quantity: 14,
+        weight_per_piece: 50
+      }
+      const unitType = 'g'
+      const unitSize = 200
+
+      const result = subtractQuantity(info as QuantityUpdateInfo, unitSize, unitType)
+
+      expect(result).toBe(10)
+    })
+
+    it('subtracts pcs and ounces', () => {
+      const info = {
+        primary_unit: 'pcs',
+        quantity: 13,
+        weight_per_piece: 50
+      }
+      const unitType = 'oz'
+      const unitSize = 5
+
+      const result = subtractQuantity(info as QuantityUpdateInfo, unitSize, unitType)
+
+      expect(result).toBe(10)
+    })
+  })
+})

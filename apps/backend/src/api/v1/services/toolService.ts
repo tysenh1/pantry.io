@@ -126,18 +126,6 @@ export const subtractQuantity = (info: QuantityUpdateInfo, unitSize: number, uni
 };
 
 export const toolDefinitions: Tool[] = [
-  // {
-  //   type: 'function',
-  //   function: {
-  //     name: 'getPantry',
-  //     description: 'Call this FIRST to see what ingredients are available.',
-  //     parameters: {
-  //       type: 'object',
-  //       properties: {},
-  //       required: []
-  //     }
-  //   }
-  // },
   {
     type: 'function',
     function: {
