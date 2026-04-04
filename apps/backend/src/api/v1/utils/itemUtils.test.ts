@@ -118,8 +118,6 @@ describe('incrementQuantity()', () => {
 
     createSchema(db, schemaSql)
 
-    // seedSampleData(db)
-
     seedTestData(db)
   })
 

@@ -67,6 +67,12 @@ export const seedTestData = (db) => {
       generic_name_id: 'testPcs1',
       quantity: 2,
       is_staple: 0
+    },
+    {
+      id: 'testtest',
+      generic_name_id: 'testGrams2',
+      quantity: 1,
+      is_staple: 0
     }
   ]
 
