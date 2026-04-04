@@ -1,4 +1,5 @@
 import { ProductV2 } from "@openfoodfacts/openfoodfacts-nodejs";
+import type { Database } from 'better-sqlite3';
 
 // DATABASE TYPES
 
@@ -49,8 +50,6 @@ export interface ItemAllergens {
   allergen_id: string;
 }
 
-
-
 export interface RecipeBase {
   id: string;
   name: string;
@@ -64,9 +63,9 @@ export interface RecipeFull extends RecipeBase {
 
 export interface KitchenTools {
   // getPantry: () => Promise<string>;
-  browseAllRecipes: (args: { tags?: string, keywords?: string }) => Promise<string>;
-  getRecipeDetails: (args: { recipe_id: any }) => Promise<string>;
-  subtractRecipeIngredientQuantities: (args: { recipe_id: string }) => Promise<string>;
+  browseAllRecipes: (args: { db: Database }) => string;
+  getRecipeDetails: (args: { recipe_id: string, db: Database }) => string;
+  subtractRecipeIngredientQuantities: (args: { recipe_id: string, db: Database }) => string;
 }
 
 export interface LLMResponse {

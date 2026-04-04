@@ -1,5 +1,5 @@
 import type { Product } from "../types";
-import { db } from "../config/db";
+import { database } from "../config/db";
 import Fuse, { FuseResult } from 'fuse.js'
 import { GenericNameInfo, ItemInfo } from "../../../../../shared/types";
 import { QuantityUpdateInfo } from "../types";
@@ -31,8 +31,7 @@ export function parseUnit(product: Product): string {
 export function parseQuantity(product: Product): number {
   let finalQuantity = 0;
   if (product.product_quantity) {
-    // @ts-expect-error type is actually a number and turning it into a string removes decimal values
-    finalQuantity = product.product_quantity as number
+    finalQuantity = parseFloat(product.product_quantity)
   } else if (product.quantity) {
     const regexArray = product.quantity.match(UNIT_REGEX)
     if (regexArray !== null && regexArray[1] !== null && regexArray[1] !== '') {
@@ -43,7 +42,7 @@ export function parseQuantity(product: Product): number {
   return finalQuantity;
 }
 
-export const findGenericMatch = (productName: string = '', categoriesString: string = ''): FuseResult<GenericNameInfo>[] => {
+export const findGenericMatch = (productName: string = '', categoriesString: string = '', db = database): FuseResult<GenericNameInfo>[] => {
   const categories = categoriesString.split(',')
   const genericBuckets = db.prepare('SELECT id, name FROM generic_name').all();
 
@@ -69,7 +68,7 @@ export const findGenericMatch = (productName: string = '', categoriesString: str
   }
 
   const cleanedName = productName
-    .replace(/\d+(\.\d+)?\s*(oz|g|ml|kg|lb|oz|pcs)/gi, '') // Strip units
+    .replace(/\d+(\.\d+)?\s*(oz|g|ml|kg|lb|oz|pcs)/gi, '')
     .trim();
   const splitName = cleanedName.split(' ')
 
@@ -84,13 +83,13 @@ export const findGenericMatch = (productName: string = '', categoriesString: str
   return searchResults;
 }
 
-export const incrementQuantity = async (item: ItemInfo): Promise<ItemInfo> => {
-  const quantityUpdateInfo: QuantityUpdateInfo = await db.prepare(`
+export const incrementQuantity = (item: ItemInfo, db = database): ItemInfo => {
+  const quantityUpdateInfo = db.prepare(`
 SELECT p.quantity, g.primary_unit, g.weight_per_piece FROM generic_name g JOIN pantry p ON p.generic_name_id = g.id WHERE g.id = ?
-`).get(item.genericName.id)
+`).get(item.genericName.id) as QuantityUpdateInfo
   const newQuantity = addQuantity(quantityUpdateInfo, item.unitSize, item.unitType)
 
-  await db.prepare(`
+  db.prepare(`
   UPDATE pantry SET quantity = ? WHERE generic_name_id = ?
   `).run(newQuantity, item.genericName.id)
 
@@ -128,7 +127,7 @@ export const addQuantity = (info: QuantityUpdateInfo, unitSize: number, unitType
 
 }
 
-const CONVERSION_RATES: Record<string, number> = {
+export const CONVERSION_RATES: Record<string, number> = {
   "lb": 453.59,
   "oz": 28.35,
   'fl_oz': 28.41,

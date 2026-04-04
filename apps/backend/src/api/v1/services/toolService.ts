@@ -1,4 +1,5 @@
-import { db } from '../config/db.ts';
+import { database } from '../config/db.ts';
+import type { Database } from 'better-sqlite3';
 import type { KitchenTools, QuantityUpdateInfo, RecipeBase, SubtractQuantitiesResult } from '../types.ts';
 import type { Tool } from 'ollama';
 import { CONVERSION_RATES, normalizeQuantity } from '../utils/itemUtils.ts';
@@ -11,7 +12,7 @@ export const toolsLogic: KitchenTools = {
   //     });
   //   });
   // },
-  browseAllRecipes: async () => {
+  browseAllRecipes: ({ db = database }: { db: Database }) => {
     //     const sql = `
     // SELECT r.id, r.name, r.tags
     // FROM recipes r
@@ -36,7 +37,7 @@ JOIN generic_name g ON p.generic_name_id = g.id
 `
 
     try {
-      const recipesInfo = await db.prepare(sql).all();
+      const recipesInfo = db.prepare(sql).all();
       const availableRecipes = normalizeRecipeQuantities(recipesInfo)
 
       return JSON.stringify(availableRecipes || { error: "No available recipes in the db." })
@@ -47,7 +48,7 @@ JOIN generic_name g ON p.generic_name_id = g.id
     }
   },
 
-  getRecipeDetails: async ({ recipe_id }) => {
+  getRecipeDetails: ({ recipe_id, db = database }) => {
     const sql = `
 SELECT r.id, r.name, r.instructions, r.tags,
 GROUP_CONCAT(g.name || ':'
@@ -62,7 +63,7 @@ GROUP BY r.id, r.name, r.instructions, r.tags
 `
 
     try {
-      const recipe = await db.prepare(sql).get(recipe_id)
+      const recipe = db.prepare(sql).get(recipe_id)
 
       return JSON.stringify(recipe || { error: "Recipe not found in database." })
     } catch (err) {
@@ -71,7 +72,7 @@ GROUP BY r.id, r.name, r.instructions, r.tags
     }
   },
 
-  subtractRecipeIngredientQuantities: async ({ recipe_id }) => {
+  subtractRecipeIngredientQuantities: ({ recipe_id, db = database }: { recipe_id: string, db: Database }) => {
     const sql = `
 SELECT ri.pantry_id, ri.quantity_needed, ri.unit, g.primary_unit, g.weight_per_piece, g.name, p.quantity
 FROM recipe_ingredients ri
@@ -79,7 +80,7 @@ JOIN pantry p ON ri.pantry_id = p.id
 JOIN generic_name g ON p.generic_name_id = g.id
 WHERE ri.recipe_id = ?
 `
-    const ingredients: {
+    const ingredients = db.prepare(sql).all(recipe_id) as {
       pantry_id: string,
       quantity_needed: number,
       unit: string,
@@ -87,7 +88,7 @@ WHERE ri.recipe_id = ?
       weight_per_piece: number,
       name: string,
       quantity: number
-    }[] = await db.prepare(sql).all(recipe_id)
+    }[]
 
     const newQuantityList = {}
 
@@ -103,7 +104,7 @@ WHERE ri.recipe_id = ?
       const newQuantityWithOldUnit = normalizeQuantity(newQuantity, ingredient.unit)
 
       try {
-        await db.prepare('UPDATE pantry SET quantity = ? WHERE id = ?').run(newQuantity, ingredient.pantry_id)
+        db.prepare('UPDATE pantry SET quantity = ? WHERE id = ?').run(newQuantity, ingredient.pantry_id)
         newQuantityList[ingredient.name] = newQuantityWithOldUnit
 
       } catch (err) {

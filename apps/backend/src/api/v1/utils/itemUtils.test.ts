@@ -1,14 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { addQuantity, normalizeQuantity, parseQuantity, parseUnit } from "./itemUtils";
-import type { Product, QuantityUpdateInfo } from "../types";
+import { addQuantity, incrementQuantity, normalizeQuantity, parseQuantity, parseUnit } from "./itemUtils";
+import type { Pantry, Product, QuantityUpdateInfo } from "../types";
+import Database from 'better-sqlite3';
+import { type Database as Sqlite3Database } from 'better-sqlite3';
+import { createSchema, seedSampleData } from "../../../seed/importSeed";
+import { seedTestData } from "../../../seed/testSeed";
+import { ItemInfo } from "../../../../../shared/types";
+import fs from 'fs';
 
-vi.mock('../config/db', () => {
-  return import('../config/__mocks__/db').then(x => ({
-    db: x.db
-  }))
-})
-
-import { db } from "../config/db";
+let db: Sqlite3Database
 
 describe('parseUnit()', () => {
   it('should return the correct unit from product.product_quantity_unit', () => {
@@ -105,14 +105,137 @@ describe('parseQuantity()', () => {
   })
 })
 
-
-describe('findGenericMatch()', () => {
-
-})
+// To be implemented later
+// describe('findGenericMatch()', () => {})
 
 
 describe('incrementQuantity()', () => {
+  beforeEach(() => {
+    db = new Database(':memory:')
 
+    const schemaPath = '/home/tysenh1/Coding/pantry.io/apps/backend/';
+    const schemaSql = fs.readFileSync(schemaPath + 'schema.sql', 'utf8');
+
+    createSchema(db, schemaSql)
+
+    // seedSampleData(db)
+
+    seedTestData(db)
+  })
+
+  it('should add item quantity to pantry quantity when both are grams', async () => {
+    const itemGrams: ItemInfo = {
+      barcode: 'code',
+      productName: 'name',
+      genericName: {
+        id: 'testGrams',
+        name: 'Grams'
+      },
+      unitSize: 250,
+      unitType: 'g'
+    }
+
+    incrementQuantity(itemGrams, db);
+
+    const result = db.prepare('SELECT * FROM pantry WHERE generic_name_id = ?').get('testGrams') as Pantry
+
+    expect(result.quantity).toBe(350)
+  })
+
+  it('should add item quantity to pantry quantity when item is ounces', () => {
+    const itemOunces: ItemInfo = {
+      barcode: 'code',
+      productName: 'name',
+      genericName: {
+        id: 'testGrams',
+        name: 'Grams',
+      },
+      unitSize: 5,
+      unitType: 'oz'
+    }
+
+    incrementQuantity(itemOunces, db)
+
+    const result = db.prepare('SELECT * FROM pantry WHERE generic_name_id = ?').get('testGrams') as Pantry
+
+    expect(result.quantity).toBe(241)
+  })
+
+  it('should add correct item quantity to pantry when item is pieces and pantry is grams', () => {
+    const itemPcs: ItemInfo = {
+      barcode: 'code',
+      productName: 'name',
+      genericName: {
+        id: 'testGrams',
+        name: 'Grams'
+      },
+      unitSize: 5,
+      unitType: 'pcs'
+    }
+
+    incrementQuantity(itemPcs, db)
+
+    const result = db.prepare('SELECT * FROM pantry WHERE generic_name_id = ?').get('testGrams') as Pantry
+
+    expect(result.quantity).toBe(350)
+  })
+
+  it('should add correct item quantity to pantry when item is grams and pantry is pieces', () => {
+    const itemGrams: ItemInfo = {
+      barcode: 'code',
+      productName: 'name',
+      genericName: {
+        id: 'testPcs',
+        name: 'Pcs'
+      },
+      unitSize: 200,
+      unitType: 'g'
+    }
+
+    incrementQuantity(itemGrams, db)
+
+    const result = db.prepare('SELECT * FROM pantry WHERE generic_name_id = ?').get('testPcs') as Pantry
+
+    expect(result.quantity).toBe(6)
+  })
+
+  it('should add correct item quantity to pantry when both are pieces', () => {
+    const itemPcs: ItemInfo = {
+      barcode: 'code',
+      productName: 'name',
+      genericName: {
+        id: 'testPcs',
+        name: 'Pcs'
+      },
+      unitSize: 6,
+      unitType: 'pcs'
+    }
+
+    incrementQuantity(itemPcs, db)
+
+    const result = db.prepare('SELECT * FROM pantry WHERE generic_name_id = ?').get('testPcs') as Pantry
+
+    expect(result.quantity).toBe(8)
+  })
+
+  it('should add correct item quantity to pantry when item is fluid ounces', () => {
+    const itemFlOz: ItemInfo = {
+      barcode: 'code',
+      productName: 'name',
+      genericName: {
+        id: 'testMl',
+        name: 'Ml'
+      },
+      unitSize: 20,
+      unitType: 'fl_oz'
+    }
+
+    incrementQuantity(itemFlOz, db)
+
+    const result = db.prepare('SELECT * FROM pantry WHERE generic_name_id = ?').get('testMl') as Pantry
+
+    expect(result.quantity).toBe(668)
+  })
 })
 
 
