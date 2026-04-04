@@ -1,6 +1,6 @@
 import { Recipe } from "../../../../../shared/types";
 import { randomUUID } from 'crypto'
-import { db } from "../config/db";
+import { database } from "../config/db";
 
 
 export const createRecipe = async (recipe: Recipe): Promise<void> => {

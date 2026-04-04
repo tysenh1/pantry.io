@@ -80,7 +80,14 @@ export const findGenericMatch = (productName: string = '', categoriesString: str
     }
   }
 
-  return searchResults;
+  const filteredResults = Object.values(searchResults.reduce((acc, curr) => {
+    const key = curr.item.id;
+    if (!acc[key] || (curr.score ? curr.score : 0) > acc[key].score) {
+      acc[key] = curr;
+    }
+    return acc;
+  }, {}));
+  return filteredResults as FuseResult<GenericNameInfo>[];
 }
 
 export const incrementQuantity = (item: ItemInfo, db = database): ItemInfo => {

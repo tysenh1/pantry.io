@@ -113,6 +113,7 @@ describe('handleBarcodeLookup()', () => {
       const barcode = 'testItem1'
 
       const result = await handleBarcodeLookup(barcode, db)
+      const quantityResult = db.prepare('SELECT quantity FROM pantry WHERE generic_name_id = ?').get('testGrams')
 
       expect(result).toMatchObject({
         doesItemExist: true,
@@ -125,6 +126,7 @@ describe('handleBarcodeLookup()', () => {
         },
         genericNames: [{ id: 'testGrams', name: 'Grams' }]
       })
+      expect(quantityResult.quantity).toBe(300)
     })
   })
 
@@ -154,7 +156,19 @@ describe('handleBarcodeLookup()', () => {
 
       const result = await handleBarcodeLookup('random code', db)
 
-      console.log(result)
+      expect(result).toMatchObject({
+        doesItemExist: false,
+        item: {
+          barcode: 'testItem2',
+          productName: 'Test',
+          unitType: 'g',
+          unitSize: 200
+        },
+        genericNames: [
+          { id: 'testGrams', name: 'Grams' },
+          { id: 'testGrams2', name: 'Grams2' }
+        ]
+      })
 
     })
   })
