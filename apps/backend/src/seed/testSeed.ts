@@ -10,20 +10,20 @@ const db = new Database('/home/tysenh1/Coding/pantry.io/apps/backend/db.db');
 export const seedTestData = (db) => {
   const genericNames: GenericName[] = [
     {
-      id: 'testGrams',
-      name: "Grams",
+      id: 'testGrams1',
+      name: "Grams1",
       primary_unit: 'g',
       weight_per_piece: 50
     },
     {
-      id: 'testMl',
-      name: 'Ml',
+      id: 'testMl1',
+      name: 'Ml1',
       primary_unit: 'ml',
       weight_per_piece: 1
     },
     {
-      id: 'testPcs',
-      name: 'Pcs',
+      id: 'testPcs1',
+      name: 'Pcs1',
       primary_unit: 'pcs',
       weight_per_piece: 50
     },
@@ -51,20 +51,20 @@ export const seedTestData = (db) => {
 
   const pantryItems: Pantry[] = [
     {
-      id: 'testGrams',
-      generic_name_id: 'testGrams',
+      id: 'testGrams1',
+      generic_name_id: 'testGrams1',
       quantity: 100,
       is_staple: 0
     },
     {
-      id: 'testMl',
-      generic_name_id: 'testMl',
+      id: 'testMl1',
+      generic_name_id: 'testMl1',
       quantity: 100,
       is_staple: 0
     },
     {
-      id: 'testPcs',
-      generic_name_id: 'testPcs',
+      id: 'testPcs1',
+      generic_name_id: 'testPcs1',
       quantity: 2,
       is_staple: 0
     }
@@ -75,9 +75,41 @@ export const seedTestData = (db) => {
       id: 'testItem1',
       barcode: 'testItem1',
       product_name: 'Test Item 1',
-      generic_name_id: 'testGrams',
+      generic_name_id: 'testGrams1',
       unit_size: 200,
       unit_type: 'g'
+    }
+  ]
+
+  const recipes: Recipes[] = [
+    {
+      id: 'testRecipe1',
+      name: 'Test Recipe 1',
+      instructions: 'This is the first test recipe.',
+      tags: 'Test,1'
+    },
+    {
+      id: 'testRecipe2',
+      name: 'Test Recipe 2',
+      instructions: 'This is the second test recipe.',
+      tags: 'Test,2'
+    }
+  ]
+
+  const recipeIngredients: RecipeIngredients[] = [
+    {
+      recipe_id: 'testRecipe1',
+      pantry_id: 'testGrams1',
+      quantity_needed: 10,
+      unit: 'g'
+    },
+
+
+    {
+      recipe_id: 'testRecipe2',
+      pantry_id: 'testPcs1',
+      quantity_needed: 1000000,
+      unit: 'pcs'
     }
   ]
 
@@ -95,6 +127,16 @@ export const seedTestData = (db) => {
   const itemStmt = db.prepare("INSERT INTO item (id, barcode, product_name, generic_name_id, unit_size, unit_type) VALUES (?, ?, ? ,?, ? ,?)")
   for (const item of items) {
     itemStmt.run(item.id, item.barcode, item.product_name, item.generic_name_id, item.unit_size, item.unit_type)
+  }
+
+  const recipeStmt = db.prepare("INSERT INTO recipes (id, name, instructions, tags) VALUES (?, ?, ?, ?)")
+  for (const recipe of recipes) {
+    recipeStmt.run(recipe.id, recipe.name, recipe.instructions, recipe.tags)
+  }
+
+  const recipeIngredientsStmt = db.prepare("INSERT INTO recipe_ingredients (recipe_id, pantry_id, quantity_needed, unit) VALUES (?, ?, ?, ?)")
+  for (const ingredient of recipeIngredients) {
+    recipeIngredientsStmt.run(ingredient.recipe_id, ingredient.pantry_id, ingredient.quantity_needed, ingredient.unit)
   }
 
 }

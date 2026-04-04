@@ -29,8 +29,8 @@ describe('createItem()', () => {
         barcode: 'testCode1',
         productName: 'test1',
         genericName: {
-          id: 'testGrams',
-          name: 'Grams'
+          id: 'testGrams1',
+          name: 'Grams1'
         },
         unitSize: 200,
         unitType: 'g'
@@ -66,7 +66,7 @@ describe('createItem()', () => {
         productName: 'test2',
         genericName: {
           id: 'testGrams2',
-          name: 'Grams'
+          name: 'Grams2'
         },
         unitSize: 200,
         unitType: 'g'
@@ -113,18 +113,18 @@ describe('handleBarcodeLookup()', () => {
       const barcode = 'testItem1'
 
       const result = await handleBarcodeLookup(barcode, db)
-      const quantityResult = db.prepare('SELECT quantity FROM pantry WHERE generic_name_id = ?').get('testGrams')
+      const quantityResult = db.prepare('SELECT quantity FROM pantry WHERE generic_name_id = ?').get('testGrams1') as { quantity: number }
 
       expect(result).toMatchObject({
         doesItemExist: true,
         item: {
           barcode: barcode,
           productName: 'Test Item 1',
-          genericName: { id: 'testGrams', name: 'Grams' },
+          genericName: { id: 'testGrams1', name: 'Grams1' },
           unitType: 'g',
           unitSize: 300
         },
-        genericNames: [{ id: 'testGrams', name: 'Grams' }]
+        genericNames: [{ id: 'testGrams1', name: 'Grams1' }]
       })
       expect(quantityResult.quantity).toBe(300)
     })
@@ -165,7 +165,7 @@ describe('handleBarcodeLookup()', () => {
           unitSize: 200
         },
         genericNames: [
-          { id: 'testGrams', name: 'Grams' },
+          { id: 'testGrams1', name: 'Grams1' },
           { id: 'testGrams2', name: 'Grams2' }
         ]
       })

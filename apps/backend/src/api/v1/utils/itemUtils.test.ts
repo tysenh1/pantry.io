@@ -128,8 +128,8 @@ describe('incrementQuantity()', () => {
       barcode: 'code',
       productName: 'name',
       genericName: {
-        id: 'testGrams',
-        name: 'Grams'
+        id: 'testGrams1',
+        name: 'Grams1'
       },
       unitSize: 250,
       unitType: 'g'
@@ -137,7 +137,7 @@ describe('incrementQuantity()', () => {
 
     incrementQuantity(itemGrams, db);
 
-    const result = db.prepare('SELECT * FROM pantry WHERE generic_name_id = ?').get('testGrams') as Pantry
+    const result = db.prepare('SELECT * FROM pantry WHERE generic_name_id = ?').get('testGrams1') as Pantry
 
     expect(result.quantity).toBe(350)
   })
@@ -147,8 +147,8 @@ describe('incrementQuantity()', () => {
       barcode: 'code',
       productName: 'name',
       genericName: {
-        id: 'testGrams',
-        name: 'Grams',
+        id: 'testGrams1',
+        name: 'Grams1',
       },
       unitSize: 5,
       unitType: 'oz'
@@ -156,7 +156,7 @@ describe('incrementQuantity()', () => {
 
     incrementQuantity(itemOunces, db)
 
-    const result = db.prepare('SELECT * FROM pantry WHERE generic_name_id = ?').get('testGrams') as Pantry
+    const result = db.prepare('SELECT * FROM pantry WHERE generic_name_id = ?').get('testGrams1') as Pantry
 
     expect(result.quantity).toBe(241)
   })
@@ -166,8 +166,8 @@ describe('incrementQuantity()', () => {
       barcode: 'code',
       productName: 'name',
       genericName: {
-        id: 'testGrams',
-        name: 'Grams'
+        id: 'testGrams1',
+        name: 'Grams1'
       },
       unitSize: 5,
       unitType: 'pcs'
@@ -175,7 +175,7 @@ describe('incrementQuantity()', () => {
 
     incrementQuantity(itemPcs, db)
 
-    const result = db.prepare('SELECT * FROM pantry WHERE generic_name_id = ?').get('testGrams') as Pantry
+    const result = db.prepare('SELECT * FROM pantry WHERE generic_name_id = ?').get('testGrams1') as Pantry
 
     expect(result.quantity).toBe(350)
   })
@@ -185,8 +185,8 @@ describe('incrementQuantity()', () => {
       barcode: 'code',
       productName: 'name',
       genericName: {
-        id: 'testPcs',
-        name: 'Pcs'
+        id: 'testPcs1',
+        name: 'Pcs1'
       },
       unitSize: 200,
       unitType: 'g'
@@ -194,7 +194,7 @@ describe('incrementQuantity()', () => {
 
     incrementQuantity(itemGrams, db)
 
-    const result = db.prepare('SELECT * FROM pantry WHERE generic_name_id = ?').get('testPcs') as Pantry
+    const result = db.prepare('SELECT * FROM pantry WHERE generic_name_id = ?').get('testPcs1') as Pantry
 
     expect(result.quantity).toBe(6)
   })
@@ -204,8 +204,8 @@ describe('incrementQuantity()', () => {
       barcode: 'code',
       productName: 'name',
       genericName: {
-        id: 'testPcs',
-        name: 'Pcs'
+        id: 'testPcs1',
+        name: 'Pcs1'
       },
       unitSize: 6,
       unitType: 'pcs'
@@ -213,7 +213,7 @@ describe('incrementQuantity()', () => {
 
     incrementQuantity(itemPcs, db)
 
-    const result = db.prepare('SELECT * FROM pantry WHERE generic_name_id = ?').get('testPcs') as Pantry
+    const result = db.prepare('SELECT * FROM pantry WHERE generic_name_id = ?').get('testPcs1') as Pantry
 
     expect(result.quantity).toBe(8)
   })
@@ -223,8 +223,8 @@ describe('incrementQuantity()', () => {
       barcode: 'code',
       productName: 'name',
       genericName: {
-        id: 'testMl',
-        name: 'Ml'
+        id: 'testMl1',
+        name: 'Ml1'
       },
       unitSize: 20,
       unitType: 'fl_oz'
@@ -232,7 +232,7 @@ describe('incrementQuantity()', () => {
 
     incrementQuantity(itemFlOz, db)
 
-    const result = db.prepare('SELECT * FROM pantry WHERE generic_name_id = ?').get('testMl') as Pantry
+    const result = db.prepare('SELECT * FROM pantry WHERE generic_name_id = ?').get('testMl1') as Pantry
 
     expect(result.quantity).toBe(668)
   })

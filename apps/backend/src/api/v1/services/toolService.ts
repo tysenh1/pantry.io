@@ -4,32 +4,9 @@ import type { KitchenTools, QuantityUpdateInfo, RecipeBase, SubtractQuantitiesRe
 import type { Tool } from 'ollama';
 import { CONVERSION_RATES, normalizeQuantity } from '../utils/itemUtils.ts';
 export const toolsLogic: KitchenTools = {
-  // getPantry: async () => {
-  //   return new Promise((resolve) => {
-  //     db.all("SELECT item_name, quantity, unit FROM pantry WHERE quantity > 0;", (err, rows) => {
-  //       console.log("PANTRY", rows)
-  //       resolve(JSON.stringify(rows || "Pantry is empty."))
-  //     });
-  //   });
-  // },
   browseAllRecipes: ({ db = database }: { db: Database }) => {
-    //     const sql = `
-    // SELECT r.id, r.name, r.tags
-    // FROM recipes r
-    // JOIN recipe_ingredients ri ON r.id = ri.recipe_id
-    // JOIN pantry p ON ri.pantry_id = p.id
-    // GROUP BY r.id, r.name, r.tags
-    // HAVING
-    //   COUNT(*) = SUM(
-    //     CASE
-    //       WHEN p.quantity > 0 AND p.quantity >= ri.quantity_needed
-    //       THEN 1
-    //       ELSE 0
-    //     END
-    //   )
-    // `
     const sql = `
-SELECT r.id, r.name, r.tags, ri.quantity_needed ri.unit AS ingredient_unit, p.quantity AS pantry_quantity, g.primary_unit
+SELECT r.id, r.name, r.tags, ri.quantity_needed, ri.unit AS ingredient_unit, p.quantity AS pantry_quantity, g.primary_unit
 FROM recipes r
 JOIN recipe_ingredients ri ON r.id = ri.recipe_id
 JOIN pantry p ON ri.pantry_id = p.id
@@ -40,8 +17,8 @@ JOIN generic_name g ON p.generic_name_id = g.id
       const recipesInfo = db.prepare(sql).all();
       const availableRecipes = normalizeRecipeQuantities(recipesInfo)
 
-      return JSON.stringify(availableRecipes || { error: "No available recipes in the db." })
-      // return JSON.stringify(recipes || { error: "No recipes in the db." })
+      // return JSON.stringify(availableRecipes || { error: "No available recipes in the db." })
+      return JSON.stringify(availableRecipes.length >= 1 ? availableRecipes : { error: "No available recipes in the db." })
     } catch (err) {
       console.error(err)
       return JSON.stringify({ error: "An error occured while fetching recipes." })
@@ -56,7 +33,7 @@ GROUP_CONCAT(g.name || ':'
   || ri.unit, '; ') AS detailed_ingredients
 FROM recipes r
 LEFT JOIN recipe_ingredients ri ON r.id = ri.recipe_id
-LEFT JOIN pantry p ON r.id = p.recipe_id
+LEFT JOIN pantry p ON ri.pantry_id = p.id
 LEFT JOIN generic_name g ON p.generic_name_id = g.id
 WHERE r.id = ?
 GROUP BY r.id, r.name, r.instructions, r.tags
@@ -117,22 +94,16 @@ WHERE ri.recipe_id = ?
   }
 }
 
-
-function convertToPrimaryUnit(quantity: number, unit: string): number {
-  const rate = CONVERSION_RATES[unit.toLowerCase()];
-  return rate ? quantity * rate : quantity; // Convert to grams/liters
-}
-
-function normalizeRecipeQuantities(recipes: any[]) {
+export function normalizeRecipeQuantities(recipes: any[]) {
   return recipes.filter(recipe => {
-    const pantryQuantityInPrimaryUnit = convertToPrimaryUnit(recipe.pantry_quantity, recipe.primary_unit);
-    const neededQuantityInPrimaryUnit = convertToPrimaryUnit(recipe.quantity_needed, recipe.ingredient_unit);
+    const pantryQuantityInPrimaryUnit = normalizeQuantity(recipe.pantry_quantity, recipe.primary_unit)
+    const neededQuantityInPrimaryUnit = normalizeQuantity(recipe.quantity_needed, recipe.ingredient_unit)
 
     return pantryQuantityInPrimaryUnit >= neededQuantityInPrimaryUnit;
   });
 }
 
-const subtractQuantity = (info: QuantityUpdateInfo, unitSize: number, unitType: string) => {
+export const subtractQuantity = (info: QuantityUpdateInfo, unitSize: number, unitType: string) => {
   if (info.primary_unit === unitType) {
     return Math.floor(info.quantity - unitSize);
   }
