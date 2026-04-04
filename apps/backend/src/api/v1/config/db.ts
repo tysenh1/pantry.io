@@ -1,4 +1,5 @@
-import sqlite3 from 'better-sqlite3';
+import Database from 'better-sqlite3';
+import { type Database as Sqlite3Database } from 'better-sqlite3';
 
-export const db = new sqlite3('./db.db');
+export const database: Sqlite3Database = new Database('./db.db');
 

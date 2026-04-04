@@ -1,9 +1,9 @@
 import { Recipe } from "../../../../../shared/types";
 import { randomUUID } from 'crypto'
-import { db } from "../config/db";
+import { database } from "../config/db";
 
 
-export const createRecipe = async (recipe: Recipe): Promise<void> => {
+export const createRecipe = (recipe: Recipe, db = database): void => {
   const recipeId = randomUUID();
   const recipeSql = `
 INSERT INTO recipes (id, name, instructions, tags)
@@ -21,7 +21,7 @@ VALUES (?, ?, ?, ?);
   ]
 
   try {
-    await db.prepare(recipeSql).run(recipeParams)
+    db.prepare(recipeSql).run(recipeParams)
   } catch (err) {
     console.error("DB Error:", err)
     throw new Error(err.message)
@@ -34,13 +34,13 @@ VALUES (?, ?, ?, ?);
 `
     const ingredientParams = [
       recipeId,
-      ingredient.id,
-      ingredient.quantityNeeded,
+      ingredient.pantry_id,
+      ingredient.quantity_needed,
       ingredient.unit
     ]
 
     try {
-      await db.prepare(ingredientSql).run(ingredientParams)
+      db.prepare(ingredientSql).run(ingredientParams)
     } catch (err) {
       console.error("DB Error:", err)
       throw new Error(err.message)

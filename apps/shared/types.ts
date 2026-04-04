@@ -31,8 +31,8 @@ export interface Recipe {
 }
 
 export interface RecipeIngredients {
-  id: string;
-  name: string;
-  quantityNeeded: number;
+  recipe_id: string;
+  pantry_id: string;
+  quantity_needed: number;
   unit: string;
 }

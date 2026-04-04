@@ -1,12 +1,12 @@
 import type { BarcodeLookupResponse, GenericNameInfo, ItemInfo } from '../../../../../shared/types.ts';
 import type { GenericName, Item, QuantityUpdateInfo } from '../types.ts';
-import { db } from '../config/db.ts';
+import { database } from '../config/db.ts';
 import type { OFFResponse } from '../types.ts';
 import { randomUUID } from 'crypto';
-import { type ProductV2 } from '@openfoodfacts/openfoodfacts-nodejs'
 import { parseUnit, parseQuantity, findGenericMatch, incrementQuantity, addQuantity } from '../utils/itemUtils.ts';
 import { ExternalLookupError } from '../errors/errors.ts';
 import { ERROR_CODE } from '../../../constants/errorConstants.ts';
+import { type Database } from 'better-sqlite3';
 
 
 
@@ -16,10 +16,12 @@ function parseListFromString(stringToParse: string): string[] {
   return stringToParse.split(',')
 }
 
-export const handleBarcodeLookup = async (barcode: string): Promise<BarcodeLookupResponse> => {
+export const handleBarcodeLookup = async (barcode: string, db: Database = database): Promise<BarcodeLookupResponse> => {
 
   console.log(barcode)
-  const localItem: {
+  const localItem = db.prepare(`
+    SELECT * FROM item JOIN generic_name ON item.generic_name_id = generic_name.id WHERE barcode = ?
+  `).get(barcode) as {
     id: string,
     barcode: string,
     product_name: string,
@@ -29,19 +31,16 @@ export const handleBarcodeLookup = async (barcode: string): Promise<BarcodeLooku
     name: string,
     primary_unit: string,
     weight_per_piece: number
-  } = await db.prepare(`
-    SELECT * FROM item JOIN generic_name ON item.generic_name_id = generic_name.id WHERE barcode = ?
-  `).get(barcode);
-
+  };
 
   if (localItem) {
-    const itemWithNewQuantity = await incrementQuantity({
+    const itemWithNewQuantity = incrementQuantity({
       barcode: localItem.barcode,
       productName: localItem.product_name,
       genericName: { id: localItem.generic_name_id, name: localItem.name },
       unitType: localItem.unit_type,
       unitSize: localItem.unit_size
-    })
+    }, db)
 
 
     return {
@@ -58,7 +57,7 @@ export const handleBarcodeLookup = async (barcode: string): Promise<BarcodeLooku
     throw new ExternalLookupError(barcode, ERROR_CODE.EXTERNAL_LOOKUP_FAILED_CODE)
   }
 
-  const genericNameMatches = findGenericMatch(data.product.product_name, data.product.categories)
+  const genericNameMatches = findGenericMatch(data.product.product_name, data.product.categories, db)
 
   const genericNames = genericNameMatches
     // @ts-ignore
@@ -82,7 +81,7 @@ export const handleBarcodeLookup = async (barcode: string): Promise<BarcodeLooku
 };
 
 
-export const createItem = async (itemInfo: ItemInfo): Promise<ItemInfo> => {
+export const createItem = (itemInfo: ItemInfo, db: Database = database): ItemInfo => {
   const itemId = randomUUID();
   const sql = `
     INSERT INTO item (id, barcode, product_name, generic_name_id, unit_size, unit_type)
@@ -109,7 +108,7 @@ export const createItem = async (itemInfo: ItemInfo): Promise<ItemInfo> => {
   const pantryItem = db.prepare('SELECT * FROM pantry WHERE generic_name_id = ?').get(itemInfo.genericName.id)
 
   if (pantryItem) {
-    const itemWithNewQuantity = await incrementQuantity(itemInfo)
+    const itemWithNewQuantity = incrementQuantity(itemInfo, db)
 
     return itemWithNewQuantity
   } else {
@@ -126,8 +125,8 @@ VALUES (?, ?, ?, ?);
     ]
 
     try {
-      db.prepare(sql2).run(params)
-      const itemWithNewQuantity = incrementQuantity(itemInfo)
+      db.prepare(sql2).run(pantryParams)
+      const itemWithNewQuantity = incrementQuantity(itemInfo, db)
       return itemWithNewQuantity
     } catch (err: any) {
       console.error("DB Error:", err);

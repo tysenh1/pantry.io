@@ -1,12 +1,12 @@
-import { type ProductV2 } from "@openfoodfacts/openfoodfacts-nodejs"
-import { db } from "../config/db";
+import type { Product } from "../types";
+import { database } from "../config/db";
 import Fuse, { FuseResult } from 'fuse.js'
 import { GenericNameInfo, ItemInfo } from "../../../../../shared/types";
 import { QuantityUpdateInfo } from "../types";
 
 const UNIT_REGEX = /^([0-9.]+)\s*([a-zA-Z]+)/;
 
-export function parseUnit(product: ProductV2): string {
+export function parseUnit(product: Product): string {
 
   if (product.product_quantity_unit) {
     return product.product_quantity_unit
@@ -14,13 +14,13 @@ export function parseUnit(product: ProductV2): string {
     return product.net_weight_unit
   } else if (product.product_quantity_string) {
     const regexArray = product.product_quantity_string.match(UNIT_REGEX)
-    if (regexArray[2]) {
+    if (regexArray !== null && regexArray[2] !== null && regexArray[2] !== '') {
       return regexArray[2] ? regexArray[2] as string : ''
     }
   } else if (product.quantity) {
     const regexArray = product.quantity.match(UNIT_REGEX)
-    if (regexArray[2]) {
-      return regexArray[2] ? regexArray[2] as string : ''
+    if (regexArray !== null && regexArray[2] !== null && regexArray[2] !== '') {
+      return regexArray[2] as string
     }
   }
 
@@ -28,14 +28,13 @@ export function parseUnit(product: ProductV2): string {
 
 }
 
-export function parseQuantity(product: ProductV2): number {
+export function parseQuantity(product: Product): number {
   let finalQuantity = 0;
   if (product.product_quantity) {
-    // @ts-expect-error type is actually a number and turning it into a string removes decimal values
-    finalQuantity = product.product_quantity as number
+    finalQuantity = parseFloat(product.product_quantity)
   } else if (product.quantity) {
     const regexArray = product.quantity.match(UNIT_REGEX)
-    if (regexArray[1]) {
+    if (regexArray !== null && regexArray[1] !== null && regexArray[1] !== '') {
       finalQuantity = parseFloat(regexArray[1])
     }
   }
@@ -43,7 +42,7 @@ export function parseQuantity(product: ProductV2): number {
   return finalQuantity;
 }
 
-export const findGenericMatch = (productName: string = '', categoriesString: string = ''): FuseResult<GenericNameInfo>[] => {
+export const findGenericMatch = (productName: string = '', categoriesString: string = '', db = database): FuseResult<GenericNameInfo>[] => {
   const categories = categoriesString.split(',')
   const genericBuckets = db.prepare('SELECT id, name FROM generic_name').all();
 
@@ -69,7 +68,7 @@ export const findGenericMatch = (productName: string = '', categoriesString: str
   }
 
   const cleanedName = productName
-    .replace(/\d+(\.\d+)?\s*(oz|g|ml|kg|lb|oz|pcs)/gi, '') // Strip units
+    .replace(/\d+(\.\d+)?\s*(oz|g|ml|kg|lb|oz|pcs)/gi, '')
     .trim();
   const splitName = cleanedName.split(' ')
 
@@ -81,16 +80,23 @@ export const findGenericMatch = (productName: string = '', categoriesString: str
     }
   }
 
-  return searchResults;
+  const filteredResults = Object.values(searchResults.reduce((acc, curr) => {
+    const key = curr.item.id;
+    if (!acc[key] || (curr.score ? curr.score : 0) > acc[key].score) {
+      acc[key] = curr;
+    }
+    return acc;
+  }, {}));
+  return filteredResults as FuseResult<GenericNameInfo>[];
 }
 
-export const incrementQuantity = async (item: ItemInfo): Promise<ItemInfo> => {
-  const quantityUpdateInfo: QuantityUpdateInfo = await db.prepare(`
+export const incrementQuantity = (item: ItemInfo, db = database): ItemInfo => {
+  const quantityUpdateInfo = db.prepare(`
 SELECT p.quantity, g.primary_unit, g.weight_per_piece FROM generic_name g JOIN pantry p ON p.generic_name_id = g.id WHERE g.id = ?
-`).get(item.genericName.id)
+`).get(item.genericName.id) as QuantityUpdateInfo
   const newQuantity = addQuantity(quantityUpdateInfo, item.unitSize, item.unitType)
 
-  await db.prepare(`
+  db.prepare(`
   UPDATE pantry SET quantity = ? WHERE generic_name_id = ?
   `).run(newQuantity, item.genericName.id)
 
@@ -108,23 +114,30 @@ SELECT p.quantity, g.primary_unit, g.weight_per_piece FROM generic_name g JOIN p
 export const addQuantity = (info: QuantityUpdateInfo, unitSize: number, unitType: string) => {
 
   if (info.primary_unit == unitType) {
-    return info.quantity + unitSize
+    return Math.floor(info.quantity + unitSize)
   }
 
   if (unitType === 'pcs' && info.primary_unit !== 'pcs') {
-    const amountGrams = unitSize * info.weight_per_piece
+    const amountGrams = unitSize * (info.weight_per_piece ?? 0);
     // This is mostly here as a safeguard in case I add more units that the pantry can have, right now its just ml, g and pcs
-    const rate = CONVERSION_RATES[info.primary_unit.toLowerCase()]
-    return rate ? amountGrams / rate : amountGrams
+    return Math.floor(info.quantity + normalizeQuantity(amountGrams, 'g', info.primary_unit))
   }
 
-  return normalizeQuantity(unitSize, unitType)
+  if (unitType !== 'pcs' && info.primary_unit === 'pcs') {
+    const amountGrams = info.quantity * info.weight_per_piece
+    const amountToAdd = normalizeQuantity(unitSize, unitType, 'g')
+    return Math.floor((amountGrams + amountToAdd) / info.weight_per_piece)
+  }
+
+  const newQuantity = normalizeQuantity(unitSize, unitType, info.primary_unit)
+  return Math.floor(info.quantity + newQuantity)
 
 }
 
-const CONVERSION_RATES: Record<string, number> = {
+export const CONVERSION_RATES: Record<string, number> = {
   "lb": 453.59,
   "oz": 28.35,
+  'fl_oz': 28.41,
   "kg": 1000,
   "l": 1000,
   "ml": 1,
@@ -132,7 +145,11 @@ const CONVERSION_RATES: Record<string, number> = {
   "pcs": 1
 };
 
-function normalizeQuantity(amount: number, unit: string): number {
-  const rate = CONVERSION_RATES[unit.toLowerCase()];
-  return rate ? amount * rate : amount;
+export function normalizeQuantity(amount: number, fromUnit: string, toUnit: string = 'g'): number {
+  const fromRate = CONVERSION_RATES[fromUnit.toLowerCase()];
+  const toRate = CONVERSION_RATES[toUnit.toLowerCase()];
+  if (fromRate === undefined || toRate === undefined) {
+    return amount;
+  }
+  return (amount * fromRate) / toRate;
 }
