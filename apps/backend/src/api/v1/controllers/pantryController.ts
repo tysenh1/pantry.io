@@ -15,3 +15,17 @@ export const getAllGenericNames = async (
     next(err)
   }
 }
+
+export const quickAdd = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const item = await pantryService.quickAdd(req.body)
+
+    res.status(200).json(successResponse(item, "Item updated successfully"))
+  } catch (err) {
+    next(err)
+  }
+}

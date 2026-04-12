@@ -28,7 +28,7 @@ export function RecipeForm({ setIsRecipeFormVisible, isRecipeFormVisible }: {
     setIngredientInputList(newInputs)
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
 
     try {
