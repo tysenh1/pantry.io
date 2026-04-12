@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import { type GenericNameInfo, type pantryGenericNameResponse, type Recipe, type RecipeIngredients } from "../../../../shared/types"
 import { addRecipe } from "@/apis/recipeService"
 import { getAllGenericNames } from "@/apis/pantryService"
+import HoverWidget from "../layout/hoverWidget"
 
 
 export function RecipeForm({ setIsRecipeFormVisible, isRecipeFormVisible }: {
@@ -11,13 +12,13 @@ export function RecipeForm({ setIsRecipeFormVisible, isRecipeFormVisible }: {
   const [name, setName] = useState('')
   const [instructions, setInstructions] = useState('')
   const [tags, setTags] = useState('')
-  const [ingredientInputList, setIngredientInputList] = useState<RecipeIngredients[]>([{ id: '', name: '', quantityNeeded: 0, unit: '' }])
+  const [ingredientInputList, setIngredientInputList] = useState<RecipeIngredients[]>([{ recipe_id: '', pantry_id: '', quantity_needed: 0, unit: '' }])
   const [genericNames, setGenericNames] = useState<pantryGenericNameResponse[] | null>(null)
   const [isSuccessModalVisible, setIsSuccessModalVisible] = useState(false)
 
   const handleQuantityChange = (index: number, event: React.ChangeEvent<HTMLInputElement>) => {
     const newInputs = [...ingredientInputList]
-    newInputs[index].quantityNeeded = parseInt(event.target.value);
+    newInputs[index].quantity_needed = parseInt(event.target.value);
     setIngredientInputList(newInputs)
   }
 
@@ -43,7 +44,7 @@ export function RecipeForm({ setIsRecipeFormVisible, isRecipeFormVisible }: {
         if (
           ingredient.unit === ''
           && ingredient.unit === ''
-          && ingredient.quantityNeeded === 0
+          && ingredient.quantity_needed === 0
         ) {
           throw new Error('Ingredients must have each input filled.')
         }
@@ -94,7 +95,7 @@ export function RecipeForm({ setIsRecipeFormVisible, isRecipeFormVisible }: {
   }, [])
 
   return (
-    (isRecipeFormVisible && <div className="fixed inset-0 flex items-center justify-center z-50 backdrop-blur-xs">
+    <HoverWidget isVisible={isRecipeFormVisible}>
       <div className="bg-black border border-white w-2/3 h-2/3 rounded-xl">
         <button onClick={() => setIsRecipeFormVisible(false)} className="bg-white p-2 cursor-pointer rounded-xl m-2">Close Recipe Form</button>
         <form className="flex flex-col items-center">
@@ -122,7 +123,7 @@ export function RecipeForm({ setIsRecipeFormVisible, isRecipeFormVisible }: {
               <input
                 className="border border-white mr-4"
                 type="number"
-                value={input.quantityNeeded}
+                value={input.quantity_needed}
                 onChange={(e) => handleQuantityChange(index, e)}
               />
               <input
@@ -133,12 +134,12 @@ export function RecipeForm({ setIsRecipeFormVisible, isRecipeFormVisible }: {
               />
             </label>
           ))}
-          <button className="border border-white" type="button" onClick={() => setIngredientInputList([...ingredientInputList, { id: '', name: '', quantityNeeded: 0, unit: '' }])}>Add Ingredient</button>
+          <button className="border border-white" type="button" onClick={() => setIngredientInputList([...ingredientInputList, { recipe_id: '', pantry_id: '', quantity_needed: 0, unit: '' }])}>Add Ingredient</button>
           <button className="border border-white my-4" type="button" onClick={(e) => handleSubmit(e)}>Submit</button>
         </form>
+
+        {isSuccessModalVisible && <SuccessModal />}
       </div>
-      {isSuccessModalVisible && <SuccessModal />}
-    </div >
-    )
+    </HoverWidget>
   )
 }

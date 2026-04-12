@@ -1,7 +1,7 @@
-import type { pantryGenericNameResponse } from "../../../shared/types";
+import type { PantryGenericNameResponse } from "../../../shared/types";
 
 
-export async function getAllGenericNames(): Promise<{ data: pantryGenericNameResponse[], message: string }> {
+export async function getAllGenericNames(): Promise<{ data: PantryGenericNameResponse[], message: string }> {
   const response = await fetch(`https://${import.meta.env.VITE_IP_ADDR}:3001/api/v1/pantry/generic-names`)
 
   if (response.ok) {
