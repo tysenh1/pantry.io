@@ -13,6 +13,16 @@ export function IngredientQuickAdd({ setIsIngredientQuickAddVisible, isIngredien
   const [quantity, setQuantity] = useState<string>('')
   const [unit, setUnit] = useState<string>('')
   const [isSuccessModalVisible, setIsSuccessModalVisible] = useState(false)
+  const [updatedItem, setUpdatedItem] = useState<ItemInfo>({
+    barcode: '',
+    productName: '',
+    genericName: {
+      id: '',
+      name: '',
+    },
+    unitSize: 0,
+    unitType: ''
+  })
 
   const handleNameChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setGenericNameIndex(e.target.value)
@@ -45,7 +55,9 @@ export function IngredientQuickAdd({ setIsIngredientQuickAddVisible, isIngredien
         unitType: unit
       }
 
-      await quickAdd(item)
+      const updatedItem = await quickAdd(item)
+      setUpdatedItem(updatedItem.data)
+
       setIsSuccessModalVisible(true)
     } catch (err) {
       alert(err)
@@ -66,7 +78,7 @@ export function IngredientQuickAdd({ setIsIngredientQuickAddVisible, isIngredien
     return (
       <div className="fixed bg-black border border-white w-1/3 h-1/3 flex flex-col rounded-xl items-center justify-center">
         <h2 className="text-3xl font-bold">Success!</h2>
-        <p>{genericNameList[parseInt(genericNameIndex)].name} has been added to the database!</p>
+        <p>You now have {updatedItem.unitSize}{updatedItem.unitType} of {updatedItem.genericName.name} in your pantry!</p>
         <button onClick={() => setIsIngredientQuickAddVisible(false)} className="bg-white cursor-pointer rounded-xl p-2 m-2">Continue</button>
       </div>
     )

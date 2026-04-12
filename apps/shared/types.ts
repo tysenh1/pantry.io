@@ -11,7 +11,7 @@ export interface GenericNameInfo {
   name: string;
 }
 
-export interface pantryGenericNameResponse {
+export interface PantryGenericNameResponse {
   pantryId: string;
   genericNameId: string;
   weightPerPiece: number;

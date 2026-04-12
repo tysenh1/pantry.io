@@ -15,7 +15,7 @@ export async function getAllGenericNames(): Promise<{ data: PantryGenericNameRes
   }
 }
 
-export async function quickAdd(item: Partial<ItemInfo>): Promise<{}> {
+export async function quickAdd(item: Partial<ItemInfo>): Promise<{ data: ItemInfo, message: string }> {
   const response = await fetch(`https://${import.meta.env.VITE_IP_ADDR}:3001/api/v1/pantry/quick-add`, {
     method: 'POST',
     headers: {
@@ -24,12 +24,14 @@ export async function quickAdd(item: Partial<ItemInfo>): Promise<{}> {
     },
     body: JSON.stringify(item)
 
-
   })
-  console.log(response)
 
   if (response.ok) {
-    return response
+    const data: { data: ItemInfo, message: string } = await response.json()
+    if (!data.data) {
+      throw new Error('Unable to update pantry quantity')
+    }
+    return data;
   } else {
     throw new Error('Failed to update pantry item.')
   }

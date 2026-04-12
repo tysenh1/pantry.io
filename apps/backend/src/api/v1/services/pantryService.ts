@@ -18,8 +18,6 @@ export const quickAdd = async (item: Partial<ItemInfo>, db = database): Promise<
   try {
     const updatedItem = incrementQuantity(item as ItemInfo, db)
 
-    console.log(db.prepare('SELECT * FROM pantry WHERE generic_name_id = ?').get(item.genericName.id))
-
     return updatedItem;
   } catch (err) {
     console.error("DB Error:", err)
