@@ -6,7 +6,7 @@ import { socket } from './lib/socket.ts';
 import { useScanner } from './hooks/useScanner.ts';
 import { BarcodeScanner } from './components/pantry/BarcodeScanner/BarcodeScanner.tsx';
 import { RecipeForm } from './components/recipe/RecipeForm.tsx';
-import { IngredientQuickAdd } from './components/quickAdd/RecipeQuickAdd.tsx';
+import { IngredientQuickAdd } from './components/quickAdd/IngredientQuickAdd.tsx';
 
 
 
