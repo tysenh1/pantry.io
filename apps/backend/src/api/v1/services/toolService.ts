@@ -17,8 +17,14 @@ JOIN generic_name g ON p.generic_name_id = g.id
       const recipesInfo = db.prepare(sql).all();
       const availableRecipes = normalizeRecipeQuantities(recipesInfo)
 
+      const prunedRecipes = []
+      for (const recipe of availableRecipes) {
+        // @ts-ignore
+        prunedRecipes.push({ name: recipe.name, tags: recipe.tags })
+      }
+
       // return JSON.stringify(availableRecipes || { error: "No available recipes in the db." })
-      return JSON.stringify(availableRecipes.length >= 1 ? availableRecipes : { error: "No available recipes in the db." })
+      return JSON.stringify(prunedRecipes.length >= 1 ? prunedRecipes : { error: "No available recipes in the db." })
     } catch (err) {
       console.error(err)
       return JSON.stringify({ error: "An error occured while fetching recipes." })
