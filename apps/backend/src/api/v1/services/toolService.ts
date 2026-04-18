@@ -5,6 +5,7 @@ import type { Tool } from 'ollama';
 import { CONVERSION_RATES, normalizeQuantity } from '../utils/itemUtils.ts';
 export const toolsLogic: KitchenTools = {
   browseAllRecipes: ({ db = database }: { db: Database }) => {
+    console.log("browseAllRecipes is running")
     const sql = `
 SELECT r.id, r.name, r.tags, ri.quantity_needed, ri.unit AS ingredient_unit, p.quantity AS pantry_quantity, g.primary_unit
 FROM recipes r

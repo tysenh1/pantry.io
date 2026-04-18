@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { type GenericNameInfo, type pantryGenericNameResponse, type Recipe, type RecipeIngredients } from "../../../../shared/types"
+import { type PantryGenericNameResponse, type Recipe, type RecipeIngredients } from "../../../../shared/types"
 import { addRecipe } from "@/apis/recipeService"
 import { getAllGenericNames } from "@/apis/pantryService"
 import HoverWidget from "../layout/hoverWidget"
@@ -13,7 +13,7 @@ export function RecipeForm({ setIsRecipeFormVisible, isRecipeFormVisible }: {
   const [instructions, setInstructions] = useState('')
   const [tags, setTags] = useState('')
   const [ingredientInputList, setIngredientInputList] = useState<RecipeIngredients[]>([{ recipe_id: '', pantry_id: '', quantity_needed: 0, unit: '' }])
-  const [genericNames, setGenericNames] = useState<pantryGenericNameResponse[] | null>(null)
+  const [genericNames, setGenericNames] = useState<PantryGenericNameResponse[] | null>(null)
   const [isSuccessModalVisible, setIsSuccessModalVisible] = useState(false)
 
   const handleQuantityChange = (index: number, event: React.ChangeEvent<HTMLInputElement>) => {

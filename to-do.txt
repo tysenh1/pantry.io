@@ -22,3 +22,5 @@ flow of adding an item to db:
     item is fetched from OFF (open food facts db)
     item is returned to the user with possible generic names for the item fetched from the "generic_name" database
     user inputs correct information and ships back the item, adding a new generic name if the one currently in the db doesn't work
+
+

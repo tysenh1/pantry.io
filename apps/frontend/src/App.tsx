@@ -7,6 +7,7 @@ import { useScanner } from './hooks/useScanner.ts';
 import { BarcodeScanner } from './components/pantry/BarcodeScanner/BarcodeScanner.tsx';
 import { RecipeForm } from './components/recipe/RecipeForm.tsx';
 import { IngredientQuickAdd } from './components/quickAdd/IngredientQuickAdd.tsx';
+import HoverWidget from './components/layout/hoverWidget.tsx';
 
 
 
@@ -18,16 +19,22 @@ function App() {
   const { lastResult, setLastResult, isLoading, isScannerVisible, setIsScannerVisible, setIsScanning } = useScanner(socket)
   const [isRecipeFormVisible, setIsRecipeFormVisible] = useState(false)
   const [isIngredientQuickAddVisible, setIsIngredientQuickAddVisible] = useState(false)
+  const [isRecipeChosen, setIsRecipeChosen] = useState<boolean>(false)
 
   useEffect(() => {
-    socket.on('ai_stream', (text) => {
-      console.log(text)
+    socket.on('ai_stream', (responseString) => {
+      const response: { type: string; message: string; thought_process: string; } = JSON.parse(responseString)
+      console.log(response)
+
+      if (response.type === 'recipe') {
+        setIsRecipeChosen(true)
+      }
       setMessages(prev => {
         const last = prev[prev.length - 1];
         if (last?.role === 'ai') {
-          return [...prev.slice(0, -1), { ...last, content: last.content + text }];
+          return [...prev.slice(0, -1), { ...last, content: last.content + response.message }];
         }
-        return [...prev, { role: 'ai', content: text }];
+        return [...prev, { role: 'ai', content: response.message }];
       })
     })
 
@@ -42,6 +49,11 @@ function App() {
     setMessages(prev => [...prev, { role: 'user', content: input }]);
     socket.emit('user_msg', input);
     setInput('');
+  }
+
+  const handleYesPopupClick = () => {
+    socket.emit('user_msg', 'The user has chosen this recipe to cook. Call the subtractRecipeIngredientsQuantities tool function.')
+    setIsRecipeChosen(false)
   }
 
   useEffect(() => chatEnd.current?.scrollIntoView({ behavior: "smooth" }), [messages])
@@ -64,7 +76,6 @@ function App() {
 
       <IngredientQuickAdd setIsIngredientQuickAddVisible={setIsIngredientQuickAddVisible} isIngredientQuickAddVisible={isIngredientQuickAddVisible} />
 
-      {/* Chat Log 
       <div className="flex-1 overflow-y-auto space-y-4 pr-2">
         {messages.map((m, i) => (
           <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
@@ -82,8 +93,17 @@ function App() {
             </div>
           </div>
         ))}
+        {isRecipeChosen && (
+          <div className='bg-black border border-white w-1/3 h-auto rounded-xl mx-auto flex flex-col items-center p-2'>
+            <h3>Are you cooking this recipe?</h3>
+            <div>
+              <button className='bg-white cursor-pointer p-2 m-2 rounded-xl w-20' onClick={handleYesPopupClick}>Yes</button>
+              <button className='border border-white cursor-pointer p-2 m-2 rounded-xl w-20' onClick={() => setIsRecipeChosen(false)}>No</button>
+            </div>
+          </div>
+        )}
         <div ref={chatEnd} />
-      </div>*/}
+      </div>
 
 
       {/* Input Area */}
@@ -102,6 +122,7 @@ function App() {
           EXECUTE
         </button>
       </div>
+
     </div>
   )
 }
