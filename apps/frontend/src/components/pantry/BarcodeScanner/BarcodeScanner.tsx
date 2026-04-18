@@ -1,6 +1,7 @@
 import { type BarcodeLookupResponse } from '../../../../../shared/types'
 import { RenderBarcodeResult } from './BarcodeResponse.tsx'
 import { socket } from '../../../lib/socket.ts'
+import HoverWidget from '@/components/layout/hoverWidget.tsx'
 
 export function BarcodeScanner({ lastResult, setLastResult, isScannerVisible, isLoading, setIsScannerVisible, setIsScanning }: {
   lastResult: BarcodeLookupResponse | null,
@@ -16,7 +17,7 @@ export function BarcodeScanner({ lastResult, setLastResult, isScannerVisible, is
 
   return (
 
-    (isScannerVisible && <div className={`fixed inset-0 flex items-center justify-center z-50 backdrop-blur-xs`} >
+    <HoverWidget isVisible={isScannerVisible}>
       <div className='bg-black border border-white w-2/3 h-2/3 flex flex-col rounded-xl'>
         <div>
           <button onClick={() => { setIsScannerVisible(false); setIsScanning(false) }} className='bg-white p-2 cursor-pointer rounded-xl m-2'>Close Scanner</button>
@@ -32,8 +33,7 @@ export function BarcodeScanner({ lastResult, setLastResult, isScannerVisible, is
         }} />
         {lastResult && BarcodeResponse({ lastResult, setLastResult, isLoading, setIsScanning, setIsScannerVisible })}
       </div>
-    </div >
-    )
+    </HoverWidget>
   )
 }
 

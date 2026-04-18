@@ -11,10 +11,12 @@ export interface GenericNameInfo {
   name: string;
 }
 
-export interface pantryGenericNameResponse {
+export interface PantryGenericNameResponse {
   pantryId: string;
+  genericNameId: string;
+  weightPerPiece: number;
   name: string;
-  primary_unit: string;
+  primaryUnit: string;
 }
 
 export interface BarcodeLookupResponse {
@@ -36,3 +38,4 @@ export interface RecipeIngredients {
   quantity_needed: number;
   unit: string;
 }
+

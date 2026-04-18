@@ -6,6 +6,7 @@ import { socket } from './lib/socket.ts';
 import { useScanner } from './hooks/useScanner.ts';
 import { BarcodeScanner } from './components/pantry/BarcodeScanner/BarcodeScanner.tsx';
 import { RecipeForm } from './components/recipe/RecipeForm.tsx';
+import { IngredientQuickAdd } from './components/quickAdd/IngredientQuickAdd.tsx';
 
 
 
@@ -16,6 +17,7 @@ function App() {
   const chatEnd = useRef<HTMLDivElement | null>(null);
   const { lastResult, setLastResult, isLoading, isScannerVisible, setIsScannerVisible, setIsScanning } = useScanner(socket)
   const [isRecipeFormVisible, setIsRecipeFormVisible] = useState(false)
+  const [isIngredientQuickAddVisible, setIsIngredientQuickAddVisible] = useState(false)
 
   useEffect(() => {
     socket.on('ai_stream', (text) => {
@@ -52,12 +54,15 @@ function App() {
         <div>
           <button onClick={() => { setIsScannerVisible(true); setIsScanning(true); }} className='bg-white cursor-pointer p-2 m-2 rounded-xl'>Start barcode scanner</button>
           <button onClick={() => setIsRecipeFormVisible(true)} className='bg-white cursor-pointer p-2 m-2 rounded-xl'>Show Recipe Form</button>
+          <button onClick={() => setIsIngredientQuickAddVisible(true)} className='bg-white cursor-pointer p-2 m-2 rounded-xl'>Show Quick Add Form</button>
         </div>
       </div>
 
       <RecipeForm setIsRecipeFormVisible={setIsRecipeFormVisible} isRecipeFormVisible={isRecipeFormVisible} />
 
       <BarcodeScanner lastResult={lastResult} setLastResult={setLastResult} isScannerVisible={isScannerVisible} isLoading={isLoading} setIsScannerVisible={setIsScannerVisible} setIsScanning={setIsScanning} />
+
+      <IngredientQuickAdd setIsIngredientQuickAddVisible={setIsIngredientQuickAddVisible} isIngredientQuickAddVisible={isIngredientQuickAddVisible} />
 
       {/* Chat Log 
       <div className="flex-1 overflow-y-auto space-y-4 pr-2">
